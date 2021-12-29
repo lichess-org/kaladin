@@ -35,5 +35,6 @@ EXPOSE 8888
 # path fix
 ENV PYTHONPATH="$PYTHONPATH:~/kaladin"
 
-ENTRYPOINT bash
-CMD ["cd src", "python3 queue_manager.py"]
+WORKDIR src
+
+ENTRYPOINT ["./start.sh"] # Allow for multiple target to be set
