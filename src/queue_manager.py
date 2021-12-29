@@ -32,7 +32,6 @@ BATCH_TIMEOUT = int(config['BATCH_TIMEOUT'])
 BATCH_SIZE = int(config['BATCH_SIZE'])  # users to process per analysis run
 BATCH_REFRESH_WAITING_TIME = int(config['BATCH_REFRESH_WAITING_TIME'])
 
-LICHESS_URI = config['LICHESS_URI']
 LICHESS_DB = config['LICHESS_DB']
 LICHESS_USER_COLL = config['LICHESS_USER_COLL']
 
@@ -71,12 +70,6 @@ class QueueManager:
         kaladin_queue_coll = insights_db[INSIGHT_QUEUE_COLL]
         log.info('Successfully connected to insight db')
 
-        # connect to the prod main user collection
-        main_client = MongoClient(LICHESS_URI)
-        main_db = main_client[LICHESS_DB]
-        main_user_coll = main_db[LICHESS_USER_COLL]  # not currently used for kaladin without eval
-        log.info('Successfully connected to main Lichess db')
-
         # initialize SHAP explainer
         model_cfgs = [
             (0, 2, 180), # (use_eval, tc, days)
@@ -89,7 +82,7 @@ class QueueManager:
 
         self.insights_coll = insights_coll
         self.kaladin_queue_coll = kaladin_queue_coll
-        self.main_user_coll = main_user_coll
+        self.main_user_coll = None # placeholder, user coll currently not needed
         self.explainers = explainers
 
     def run(self) -> None:

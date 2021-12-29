@@ -21,7 +21,7 @@ def main(insights, user_collection):
         users = random.sample(legit_users, x)
         
         start_time = time.time()
-        output = run(insights, user_collection, use_eval=0, explainers=None, live_user_list=users)
+        output = run(insights, None, use_eval=0, explainers=None, live_user_list=users)
         end_time = time.time()
 
         test_results = {
