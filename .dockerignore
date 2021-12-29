@@ -10,3 +10,4 @@
 !src/**/*.py
 !requirements.txt
 !src/*.env
+!src/.env.base
