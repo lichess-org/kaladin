@@ -1,0 +1,264 @@
+Sesquipedalism (186):
+      built hello world for irwinsights model
+      Merge branch 'ml_poc'
+      proof of concept for docker image customization for tf-gpu with file sharing
+      fixed header size in readme
+      updated readme
+      updated readme
+      added mongodb hello world.  Re-organized files.
+      reduced size of demo notebook
+      added examples to demos.  Started experimenting with game data
+      movetime material pipeline now ends in a dataframe.  Created list of dataset problems
+      created data prep main flow
+      exploring new dataset
+      ignore .pkl
+      added mongo pipelines from lila
+      removed game ids from mongo pipelines
+      added acpl by date
+      updated docker commands to share entire repo
+      tf docker config can now install pkgs from requirements.txt
+      added timevariance_date, added metadata dict
+      Reworked data generation to reduce null values
+      resolve conflict
+      Merge branch 'sesq' into main
+      enforced density, added clipping, transforms, scaling
+      saved testing notebook
+      Merge branch 'sesq' into main
+      data prep now produces np arrays that can be digested by a CNN
+      Merge branch 'sesq' into main
+      CNN training operational, built models
+      ran chmod
+      moved train_test_split into data_prep_main
+      added models to source control
+      closed accounts are a problem
+      updated dataset problems
+      refactoring
+      refactoring
+      Merge branch 'sesq' into main
+      deleted trash
+      remove trash
+      consolidatede material dimensioned insights
+      added new pipelines
+      added date dimensions to data_prep_main
+      bugfix + blur_material added
+      refactoring
+      added movetime and phase dimensions
+      added blur dimension
+      insights generation speedup
+      bugfix + refactor
+      bugfix for blur dimensioned data
+      added result dimension
+      bugfix to timevariance dimension
+      add new dimensions and refactoring
+      refactoring to isolate insights generation
+      removed blur/material and blur/result for now, returning lists instead of floats
+      all dimensions added and tested
+      bugfix - missing values with new insight dimensions
+      removed debug logic
+      added logic to remove user limit
+      set max_users to None
+      reset notebook
+      finished insights generation pipeline and fixed bugs
+      slightly more efficient insight gen
+      more minor optimizations
+      retrained models with full data
+      retrained models using all data
+      commit to save critical data in case of system failure
+      add metadata dct
+      updated metrics
+      enabled saving train and test sets, label correction
+      updated keras environment requirements and removed opponentstrength dimension
+      implemented shap and re-trained models
+      rating and rd function
+      added dense layer data to data_prep flow
+      added rating, rd, and fixed a bug with other dense layer data
+      added composite insights, blur/movetime, blur/result
+      added evaluation, filtered insights
+      updated dataset reqts and
+      updated dataset reqts
+      new insights, bugfixes
+      fixed filtered pipelines
+      finished adding first 3 move data
+      bugfix for first 3 moves data
+      deal with infinite values in new combined insights
+      added log transforms for values
+      added logt to training notebook
+      cleanup
+      updated readme
+      add environment.yml
+      cleanup
+      experimentation with new dataset and built testing grounds for insights tools
+      created insights rule testing notebook + 5k testing notebooks
+      updated insights rule testing
+      added estimate for fdr
+      added estimate for fdr
+      added latest insights and input data to model
+      Merge branch 'main' of https://github.com/Sesquipedalism/kaladin into main
+      restructuring code and model
+      rebuilding model training to enable automated hyperparameter tuning
+      fixed bug where sometimes a dimension would have different size
+      hypertuning implemented
+      added proper validation set
+      re-structuring, preparing for live runs
+      startig to move over shap explainer
+      added test/valid data
+      predictions and shap explanations are working
+      model training end-to-end working
+      retrained 180/6 model
+      added min value clipping and support for live runs
+      predictions are now working
+      url formatter
+      prediction pipeline complete (for now)
+      ran chmod on entire repo
+      Merge branch 'sesq' into main
+      updated for single user collection
+      very minor efficiency improvement  in pipelines
+      updated for single user collection
+      data pipeline bugfixes
+      re-worked data pipeline for improved scaling of features
+      tweaking dataset parameters
+      tweaking tuning settings
+      updating run_model for latest dataset
+      bugfix
+      metrics notebook partially updated
+      update gitignore
+      retrained models
+      bugfix
+      updated metrics calculations
+      retrained models
+      cleaning up old files
+      fixed untracked files
+      preparing main for merge
+      Merge branch 'sesq' into main
+      file cleanup
+      updated readme
+      added tests
+      live runs don't read and write to disk
+      added tests
+      KaladinData handles live runs
+      tests implemented
+      building for single user case
+      fill values fixed for predictions
+      changed date bucket size
+      dont't re-index thibault's db
+      add huge files to repo
+      fix shap code
+      explainer can now run as a service
+      data incoming
+      experimenting with data
+      clean up old notebooks
+      enable kaladin without eval
+      bugfix for value filling, data built for kaladin without eval
+      kaladin without eval constants
+      updates for no eval model
+      remove fix_labels
+      trained no eval model
+      freeze package versions
+      bugfix
+      attempted to update analysisFunction
+      use_eval fix
+      updated docker config and setup
+      suppress misleading warnings for live runs
+      testing complete!
+      updated docker commands
+      resolved conflicts in queue_mgr, merged branches
+      added explainers to queue_mgr
+      explainers logic update
+      added insights_location_dct to repo
+      cleanup on analysisFunction
+      handle single user single tc case
+      support user list when live, rather than a collection
+      updated tests
+      added user pipeline WIP
+      user pipeline not needed
+      cleanup queue mgr
+      note for kaladin with eval implementation
+      removed old documents
+      removed extra line
+      move tests to src
+      added main for queue mgr, minor improvements
+      converted prints to logging throughout
+      converted prints to logging throughout
+      refactoring queue mgr and handling exceptions
+      Merge branch 'sesq' into main
+      queue_manager `analyseOneUser` repaired in OOP version
+      `dockerignore` ignores training data files
+      delete unneeded pkl file
+      include data config pkl files in Docker
+
+Thibault Duplessis (18):
+      generate legit and cheat users collections
+      create user collections
+      better export user collections
+      refresh-insights.sh
+      export v2 WIP
+      export users
+      more work on exports
+      more export WIP
+      rename user coll
+      filter games since creation date or cheatmark date
+      more legit players restrictions
+      mongo export deploy script
+      new mongo export
+      update new mongo export
+      mongo queue doc
+      simplify queue manager selection query
+      fix possibly unbound variable
+      make sure to always hit a mongodb index
+
+kraktus (34):
+      Remove unecessary executable permissions
+      Merge Readmes
+      docker improvements
+      Testing conditional build
+      fix docker script
+      Remove uneeded explanations in Readme, point to docker.sh
+      tweak Dockerfile
+      Implement config via environmental variables
+      Update `Readme`
+      Do not set date as timestamp in the queue
+      remove not useful and spamming log
+      clearer mongo query
+      better condition to check for empty `response`
+      Reduce `startedAt` delay in mongo query before and explain it.
+      Merge branch 'queue_improvements_merge' into queue_improvements2
+      By convention logging and constants are defined outside functions and accessed globally
+      remove todo since it's done
+      Restrict docker context to only needed files.
+      fix import
+      fix retry decorator
+      fix logging when using `retry` decorator
+      Better logging: Include function name in `retry`
+      Better `initialize_logging_for_modules` and `configure_logging` function signature
+      More thorough condition checking
+      Remove uneeded parameter
+      Put error kinds in an enum
+      More precise `retry`.
+      Rewrite queue_manager in OOP.
+      fix mongo retry name
+      fix `Error`
+      more explicit debugging
+      fix `updateQueue`call
+      Add again missing python files and config to `.dockerignore`
+      More typing for queue manager
+
+michael1241 (18):
+      intial commit
+      minimal example
+      readme and requirements
+      acpl vs blur progress
+      python version of mongo queue management added
+      better queue simulation and management
+      plan updates
+      time dependent queue polling and batch initiation plus formatting changes
+      added logging
+      collection building WIP
+      add suggestion for user report coverage
+      update response data with real response
+      path update
+      mongo connection updates, response format updates
+      mongo mock WIP
+      mongo mock WIP
+      test data working with local mongo
+      Merge branch 'main' of github.com:Sesquipedalism/kaladin into main
+
