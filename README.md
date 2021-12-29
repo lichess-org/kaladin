@@ -24,3 +24,13 @@ For production, you will need to run in the container `cd src && python3 queue_m
 ## Configuration
 
 For the list of options and default values used by Kaladin, see `src/.env.base`. You can override these either by setting environmental variables or create a `src/.env` file.
+
+
+## Acknowledgments
+
+The Kaladin repository was re-created when transitioning to open source to ensure that user data was not made public.  Git history was lost during that transition.  A record of the commits prior to the transition can be found [here](doc/lost_commits.txt):  
+Special thanks to:
+* [kraktus](https://github.com/kraktus) for your work on the queue manager, Docker config, error handling, lila integration, and integration testing.
+* [michael1241](https://github.com/michael1241) for your domain expertise, design discussions, initial queue manager and mongo and deployment support.
+* [ornicar](https://github.com/ornicar) for your support, your mongo wizardry, and your lila integration work.
+* the others around the globe who helped by validating the model output, generating ideas, and providing valuable feedback.
