@@ -1,0 +1,13 @@
+{
+    "date":"date",
+    "movetime":"movetime",
+    "material":"material",
+    "phase":"phase",
+    "blur":"blur",
+    "timevariance":"timeVariance",
+    "result":"result",
+    "centipawnloss":"cpl",
+    "piecemoved":"piece",
+    "evaluation":"eval",
+    "opponentstrength":"opponentStrength"
+}

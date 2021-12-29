@@ -1,0 +1,12 @@
+# Blacklist by default, whitelist only needed files
+*
+!src/common
+!src/data_preparation
+!src/model
+!src/tests
+!src/input_data/use_eval_0/insight_averages.pkl
+!src/input_data/use_eval_0/insight_bin_keys.pkl
+!src/input_data/use_eval_0/minmax_values_for_clipping.pkl
+!src/**/*.py
+!requirements.txt
+!src/*.env
