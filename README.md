@@ -9,16 +9,14 @@ You will need:
  - Docker
  - MongoDB
 
-## Docker container setup for Tensorflow with CPU or gpu
+## Docker container setup for Tensorflow with CPU or GPU
 
 ### Pre-requisites
 Install Docker using your favorite package manager, or for example you can [follow this guide](https://www.tensorflow.org/install/docker).
 
 ### Create custom image and container
 
-Run `$./docker.sh gpu|cpu` with the needed target, it will create/update the image and start the container.
-
-For production, you will need to run in the container `cd src && python3 queue_manager.py`
+Run `$./docker.sh gpu|cpu [dev|prod]` with the needed target, it will create/update the image and start the container. `dev` (default) will open `bash`, while `prod` will directly launch the queue manager: `python3 queue_manager.py`
 
 
 ## Configuration

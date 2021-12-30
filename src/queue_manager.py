@@ -157,7 +157,7 @@ class QueueManager:
         """Add one pending user to the `users_to_analyse` if any."""
         user_document = self.kaladin_queue_coll.find_one_and_update(
             {
-                # Using '$not' '$gt' instead of '$lte' allows to pick users with `startAt` field set.
+                # Using '$not' '$gt' instead of '$lte' allows to pick users without `startAt` field set.
                 # Must not pick twice the same user. There is at most `BATCH_TIMEOUT`s between the first, and the last user picked, before processing.
                 # Add a safety margin by multiplying by some constant.
                 'startedAt': {'$not': {'$gt': datetime.utcnow() - timedelta(seconds = 10 * BATCH_TIMEOUT)}},

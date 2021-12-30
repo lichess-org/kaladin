@@ -28,6 +28,4 @@ while True:
         {'_id': user, 'priority': priority, 'queuedAt': datetime.utcnow()})
     log.debug(user, "added to queue.")
     time.sleep(2)
-    db.kaladin_queue.delete_many(
-        {'response.at': {'$exists': True}})
     log.debug(list(db.kaladin_queue.find({})))
