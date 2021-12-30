@@ -15,11 +15,7 @@ movetime_by_material_pipeline = [
    {
       "$unwind":"$m"  # necessary to access individual move data
    },
-   {
-        "$sample" : {
-            "size" : 200000
-        }
-   },
+   {'$limit': 200000},
    {
       "$group":{      
          "_id":{     # Define the thing we are grouping by
@@ -149,11 +145,7 @@ timevariance_by_date_pipeline = [
             }
         }
     },
-    {
-        "$sample" : {
-            "size" : 200000
-        }
-    },
+    {'$limit': 200000},
     {
         "$bucketAuto" : {
             "groupBy" : "$d",
@@ -181,7 +173,7 @@ acpl_by_date_pipeline = [
     {'$limit': 10000},
     {'$project': {'d': True, 'm.c': True}},
     {'$unwind': '$m'},
-    {'$sample': {'size': 200000}},
+    {'$limit': 200000},
     {'$bucketAuto': {'buckets': 12,
                     'groupBy': '$d',
                     'output': {'nb': {'$sum': 1}, 'v': {'$avg': '$m.c'}}}}
@@ -201,7 +193,7 @@ acplfiltered_by_date_pipeline = [
         'm.p': {'$in': [2, 3]},           # phase filter  
         'm.i': {'$gte': -3, '$lte': 3},    # material filter
     }},
-    {'$sample': {'size': 200000}},
+    {'$limit': 200000},
     {'$bucketAuto': {'buckets': 12,
                     'groupBy': '$d',
                     'output': {'nb': {'$sum': 1}, 'v': {'$avg': '$m.c'}}}}
@@ -224,11 +216,7 @@ acpl_by_variant_pipeline = [
     {
         "$unwind" : "$m"
     },
-    {
-        "$sample" : {
-            "size" : 200000
-        }
-    },
+    {'$limit': 200000},
     {
         "$group" : {
             "_id" : "$p",
@@ -247,7 +235,7 @@ acpl_by_material_pipeline = [
     {'$limit': 10000},
     {'$project': {'m.c': True, 'm.i': True}},
     {'$unwind': '$m'},
-    {'$sample': {'size': 200000}},
+    {'$limit': 200000},
     {'$group': {'_id': {'$cond': [{'$eq': ['$m.i', 0]},
                                 5,
                                 {'$cond': [{'$lt': ['$m.i', -6]},
@@ -279,7 +267,7 @@ acpl_by_blur_pipeline = [
     {'$limit': 10000},
     {'$project': {'m.b': True, 'm.c': True}},
     {'$unwind': '$m'},
-    {'$sample': {'size': 200000}},
+    {'$limit': 200000},
     {'$group': {'_id': '$m.b',
                 'nb': {'$sum': 1},
                 'v': {'$avg': '$m.c'}}}
@@ -301,7 +289,7 @@ acplfiltered_by_blur_pipeline = [
         'm.i': {'$gte': -1, '$lte': 1},    # material filter
         'm.e': {'$gte': -500, '$lte': 500} # evaluation filter
     }},
-    {'$sample': {'size': 200000}},
+    {'$limit': 200000},
     {'$group': {'_id': '$m.b',
                 'nb': {'$sum': 1},
                 'v': {'$avg': '$m.c'}}},
@@ -314,7 +302,7 @@ acpl_by_timevariance_pipeline = [
     {'$project': {'m.c': True, 'm.v': True}},
     {'$unwind': '$m'},
     {'$match': {'m.v': {'$exists': True}}},
-    {'$sample': {'size': 200000}},
+    {'$limit': 200000},
     {'$group': {'_id': {'$cond': [{'$lte': ['$m.v', 25000]},
                             25000,
                             {'$cond': [{'$lte': ['$m.v', 40000]},
@@ -334,7 +322,7 @@ acpl_by_phase_pipeline = [
     {'$limit': 10000},
     {'$project': {'m.c': True, 'm.p': True}},
     {'$unwind': '$m'},
-    {'$sample': {'size': 200000}},
+    {'$limit': 200000},
     {'$group': {'_id': '$m.p',
                 'nb': {'$sum': 1},
                 'v': {'$avg': '$m.c'}}}
@@ -346,7 +334,7 @@ acpl_by_movetime_pipeline = [
     {'$limit': 10000},
     {'$project': {'m.c': True, 'm.t': True}},
     {'$unwind': '$m'},
-    {'$sample': {'size': 200000}},
+    {'$limit': 200000},
     {'$group': {'_id': {'$cond': [{'$lt': ['$m.t', 10]},
                                 1,
                                 {'$cond': [{'$lt': ['$m.t', 30]},
@@ -369,7 +357,7 @@ movetime_by_piecemoved_pipeline = [
     {'$limit': 10000},
     {'$project': {'m.r': True, 'm.t': True}},
     {'$unwind': '$m'},
-    {'$sample': {'size': 200000}},
+    {'$limit': 200000},
     {'$group': {'_id': '$m.r',
                 'nb': {'$sum': 1},
                 'v': {'$avg': {'$divide': ['$m.t', 10]}}}}
@@ -382,7 +370,7 @@ timevariance_by_material_pipeline = [
     {'$project': {'m.i': True, 'm.v': True}},
     {'$unwind': '$m'},
     {'$match': {'m.v': {'$exists': True}}},
-    {'$sample': {'size': 200000}},
+    {'$limit': 200000},
     {'$group': {'_id': {'$cond': [{'$eq': ['$m.i', 0]},
                                 5,
                                 {'$cond': [{'$lt': ['$m.i', -6]},
@@ -415,7 +403,7 @@ timevariance_by_result_pipeline = [
     {'$project': {'m.v': True, 'r': True}},
     {'$unwind': '$m'},
     {'$match': {'m.v': {'$exists': True}}},
-    {'$sample': {'size': 200000}},
+    {'$limit': 200000},
     {'$group': {'_id': '$r',
                 'nb': {'$sum': 1},
                 'v': {'$avg': {'$divide': ['$m.v', 100000]}}}}
@@ -426,7 +414,7 @@ blur_by_result_pipeline = [
     {'$limit': 10000},
     {'$project': {'m.b': True, 'r': True}},
     {'$unwind': '$m'},
-    {'$sample': {'size': 200000}},
+    {'$limit': 200000},
     {'$group': {'_id': '$r',
                 'nb': {'$sum': 1},
                 'v': {'$push': {'$cond': ['$m.b', 1, 0]}}}},
@@ -449,7 +437,7 @@ blurfiltered_by_result_pipeline = [
         'm.p': {'$in': [2, 3]},           # phase filter  
         'm.i': {'$gte': -1, '$lte': 1},    # material filter
     }},
-    {'$sample': {'size': 200000}},
+    {'$limit': 200000},
     {'$group': {'_id': '$r',
                 'nb': {'$sum': 1},
                 'v': {'$push': {'$cond': ['$m.b', 1, 0]}}}},
@@ -462,7 +450,7 @@ blur_by_movetime_pipeline = [
     {'$limit': 10000},
     {'$project': {'m.b': True, 'm.t': True}},
     {'$unwind': '$m'},
-    {'$sample': {'size': 200000}},
+    {'$limit': 200000},
     {'$group': {'_id': {'$cond': [{'$lt': ['$m.t', 10]},
                                 1,
                                 {'$cond': [{'$lt': ['$m.t', 30]},
@@ -487,7 +475,7 @@ blur_by_date_pipeline = [
     {'$limit': 10000},
     {'$project': {'d': True, 'm.b': True}},
     {'$unwind': '$m'},
-    {'$sample': {'size': 200000}},
+    {'$limit': 200000},
     {'$bucketAuto': {'buckets': 12,
                     'groupBy': '$d',
                     'output': {'ids': {'$addToSet': '$_id'},
@@ -502,7 +490,7 @@ movetime_by_date_pipeline = [
     {'$limit': 10000},
     {'$project': {'d': True, 'm.t': True}},
     {'$unwind': '$m'},
-    {'$sample': {'size': 200000}},
+    {'$limit': 200000},
     {'$bucketAuto': {'buckets': 12,
                     'groupBy': '$d',
                     'output': {'ids': {'$addToSet': '$_id'},
@@ -539,7 +527,7 @@ timevariance_by_movetime_pipeline = [
     {'$project': {'m.t': True, 'm.v': True}},
     {'$unwind': '$m'},
     {'$match': {'m.v': {'$exists': True}}},
-    {'$sample': {'size': 200000}},
+    {'$limit': 200000},
     {'$group': {'_id': {'$cond': [{'$lt': ['$m.t', 10]},
                                 1,
                                 {'$cond': [{'$lt': ['$m.t', 30]},
@@ -563,7 +551,7 @@ blur_by_material_pipeline = [
     {'$limit': 10000},
     {'$project': {'m.b': True, 'm.i': True}},
     {'$unwind': '$m'},
-    {'$sample': {'size': 200000}},
+    {'$limit': 200000},
     {'$group': {'_id': {'$cond': [{'$eq': ['$m.i', 0]},
                                 5,
                                 {'$cond': [{'$lt': ['$m.i', -6]},
@@ -598,7 +586,7 @@ timevariance_by_phase_pipeline = [
     {'$project': {'m.p': True, 'm.v': True}},
     {'$unwind': '$m'},
     {'$match': {'m.v': {'$exists': True}}},
-    {'$sample': {'size': 200000}},
+    {'$limit': 200000},
     {'$group': {'_id': '$m.p',
                 'nb': {'$sum': 1},
                 'v': {'$avg': {'$divide': ['$m.v', 100000]}}}},
@@ -610,7 +598,7 @@ blur_by_phase_pipeline = [
     {'$limit': 10000},
     {'$project': {'m.b': True, 'm.p': True}},
     {'$unwind': '$m'},
-    {'$sample': {'size': 200000}},
+    {'$limit': 200000},
     {'$group': {'_id': '$m.p',
                 'nb': {'$sum': 1},
                 'v': {'$push': {'$cond': ['$m.b', 1, 0]}}}},
@@ -623,7 +611,7 @@ movetime_by_phase_pipeline = [
     {'$limit': 10000},
     {'$project': {'m.p': True, 'm.t': True}},
     {'$unwind': '$m'},
-    {'$sample': {'size': 200000}},
+    {'$limit': 200000},
     {'$group': {'_id': '$m.p',
                 'nb': {'$sum': 1},
                 'v': {'$avg': {'$divide': ['$m.t', 10]}}}},
@@ -636,7 +624,7 @@ timevariance_by_blur_pipeline = [
     {'$project': {'m.b': True, 'm.v': True}},
     {'$unwind': '$m'},
     {'$match': {'m.v': {'$exists': True}}},
-    {'$sample': {'size': 200000}},
+    {'$limit': 200000},
     {'$group': {'_id': '$m.b',
                 'nb': {'$sum': 1},
                 'v': {'$avg': {'$divide': ['$m.v', 100000]}}}},
@@ -648,7 +636,7 @@ movetime_by_blur_pipeline = [
     {'$limit': 10000},
     {'$project': {'m.b': True, 'm.t': True}},
     {'$unwind': '$m'},
-    {'$sample': {'size': 200000}},
+    {'$limit': 200000},
     {'$group': {'_id': '$m.b',
                 'nb': {'$sum': 1},
                 'v': {'$avg': {'$divide': ['$m.t', 10]}}}},
@@ -661,7 +649,7 @@ blur_by_timevariance_pipeline = [
     {'$project': {'m.b': True, 'm.v': True}},
     {'$unwind': '$m'},
     {'$match': {'m.v': {'$exists': True}}},
-    {'$sample': {'size': 200000}},
+    {'$limit': 200000},
     {'$group': {'_id': {'$cond': [{'$lte': ['$m.v', 25000]},
                                 25000,
                                 {'$cond': [{'$lte': ['$m.v', 40000]},
@@ -684,7 +672,7 @@ movetime_by_timevariance_pipeline = [
     {'$project': {'m.t': True, 'm.v': True}},
     {'$unwind': '$m'},
     {'$match': {'m.v': {'$exists': True}}},
-    {'$sample': {'size': 200000}},
+    {'$limit': 200000},
     {'$group': {'_id': {'$cond': [{'$lte': ['$m.v', 25000]},
                                 25000,
                                 {'$cond': [{'$lte': ['$m.v', 40000]},
@@ -705,7 +693,7 @@ acpl_by_result_pipeline = [
     {'$limit': 10000},
     {'$project': {'m.c': True, 'r': True}},
     {'$unwind': '$m'},
-    {'$sample': {'size': 200000}},
+    {'$limit': 200000},
     {'$group': {'_id': '$r',
                 'nb': {'$sum': 1},
                 'v': {'$avg': '$m.c'}}},
@@ -717,7 +705,7 @@ movetime_by_result_pipeline = [
     {'$limit': 10000},
     {'$project': {'m.t': True, 'r': True}},
     {'$unwind': '$m'},
-    {'$sample': {'size': 200000}},
+    {'$limit': 200000},
     {'$group': {'_id': '$r',
                 'nb': {'$sum': 1},
                 'v': {'$avg': {'$divide': ['$m.t', 10]}}}},
@@ -738,7 +726,7 @@ acpl_by_opponentstrength_pipeline = [
     {'$limit': 10000},
     {'$project': {'m.c': True, 'os': True}},
     {'$unwind': '$m'},
-    {'$sample': {'size': 200000}},
+    {'$limit': 200000},
     {'$group': {'_id': '$os',
                 'nb': {'$sum': 1},
                 'v': {'$avg': '$m.c'}}},
@@ -751,7 +739,7 @@ timevariance_by_opponentstrength_pipeline = [
     {'$project': {'m.v': True, 'os': True}},
     {'$unwind': '$m'},
     {'$match': {'m.v': {'$exists': True}}},
-    {'$sample': {'size': 200000}},
+    {'$limit': 200000},
     {'$group': {'_id': '$os',
                 'nb': {'$sum': 1},
                 'v': {'$avg': {'$divide': ['$m.v', 100000]}}}},
@@ -763,7 +751,7 @@ blur_by_opponentstrength_pipeline = [
     {'$limit': 10000},
     {'$project': {'m.b': True, 'os': True}},
     {'$unwind': '$m'},
-    {'$sample': {'size': 200000}},
+    {'$limit': 200000},
     {'$group': {'_id': '$os',
                 'nb': {'$sum': 1},
                 'v': {'$push': {'$cond': ['$m.b', 1, 0]}}}},
@@ -776,7 +764,7 @@ movetime_by_opponentstrength_pipeline = [
     {'$limit': 10000},
     {'$project': {'m.t': True, 'os': True}},
     {'$unwind': '$m'},
-    {'$sample': {'size': 200000}},
+    {'$limit': 200000},
     {'$group': {'_id': '$os',
                 'nb': {'$sum': 1},
                 'v': {'$avg': {'$divide': ['$m.t', 10]}}}},
@@ -798,7 +786,7 @@ timevariance_by_centipawnloss_pipeline = [
     {'$project': {'m.c': True, 'm.v': True}},
     {'$unwind': '$m'},
     {'$match': {'m.c': {'$exists': True}, 'm.v': {'$exists': True}}},
-    {'$sample': {'size': 200000}},
+    {'$limit': 200000},
     {'$group': {'_id': {'$cond': [{'$lte': ['$m.c', 0]},
                                 0,
                                 {'$cond': [{'$lte': ['$m.c', 10]},
@@ -832,7 +820,7 @@ blur_by_centipawnloss_pipeline = [
     {'$project': {'m.b': True, 'm.c': True}},
     {'$unwind': '$m'},
     {'$match': {'m.c': {'$exists': True}}},
-    {'$sample': {'size': 200000}},
+    {'$limit': 200000},
     {'$group': {'_id': {'$cond': [{'$lte': ['$m.c', 0]},
                                 0,
                                 {'$cond': [{'$lte': ['$m.c', 10]},
@@ -867,7 +855,7 @@ movetime_by_centipawnloss_pipeline = [
     {'$project': {'m.c': True, 'm.t': True}},
     {'$unwind': '$m'},
     {'$match': {'m.c': {'$exists': True}}},
-    {'$sample': {'size': 200000}},
+    {'$limit': 200000},
     {'$group': {'_id': {'$cond': [{'$lte': ['$m.c', 0]},
                                 0,
                                 {'$cond': [{'$lte': ['$m.c', 10]},
@@ -900,7 +888,7 @@ acpl_by_piecemoved_pipeline = [
     {'$limit': 10000},
     {'$project': {'m.c': True, 'm.r': True}},
     {'$unwind': '$m'},
-    {'$sample': {'size': 200000}},
+    {'$limit': 200000},
     {'$group': {'_id': '$m.r',
                 'nb': {'$sum': 1},
                 'v': {'$avg': '$m.c'}}},
@@ -913,7 +901,7 @@ timevariance_by_piecemoved_pipeline = [
     {'$project': {'m.r': True, 'm.v': True}},
     {'$unwind': '$m'},
     {'$match': {'m.v': {'$exists': True}}},
-    {'$sample': {'size': 200000}},
+    {'$limit': 200000},
     {'$group': {'_id': '$m.r',
                 'nb': {'$sum': 1},
                 'v': {'$avg': {'$divide': ['$m.v', 100000]}}}},
@@ -925,7 +913,7 @@ blur_by_piecemoved_pipeline = [
     {'$limit': 10000},
     {'$project': {'m.b': True, 'm.r': True}},
     {'$unwind': '$m'},
-    {'$sample': {'size': 200000}},
+    {'$limit': 200000},
     {'$group': {'_id': '$m.r',
                 'nb': {'$sum': 1},
                 'v': {'$push': {'$cond': ['$m.b', 1, 0]}}}},
@@ -939,7 +927,7 @@ acpl_by_evaluation_pipeline = [
     {'$project': {'m.c': True, 'm.e': True}},
     {'$unwind': '$m'},
     {'$match': {'m.e': {'$exists': True}}},
-    {'$sample': {'size': 200000}},
+    {'$limit': 200000},
     {'$group': {'_id': {'$cond': [{'$lt': ['$m.e', -600]},
                                 1,
                                 {'$cond': [{'$lt': ['$m.e', -350]},
@@ -979,7 +967,7 @@ timevariance_by_evaluation_pipeline = [
     {'$project': {'m.e': True, 'm.v': True}},
     {'$unwind': '$m'},
     {'$match': {'m.e': {'$exists': True}, 'm.v': {'$exists': True}}},
-    {'$sample': {'size': 200000}},
+    {'$limit': 200000},
     {'$group': {'_id': {'$cond': [{'$lt': ['$m.e', -600]},
                                 1,
                                 {'$cond': [{'$lt': ['$m.e', -350]},
@@ -1020,7 +1008,7 @@ blur_by_evaluation_pipeline = [
     {'$project': {'m.b': True, 'm.e': True}},
     {'$unwind': '$m'},
     {'$match': {'m.e': {'$exists': True}}},
-    {'$sample': {'size': 200000}},
+    {'$limit': 200000},
     {'$group': {'_id': {'$cond': [{'$lt': ['$m.e', -600]},
                                 1,
                                 {'$cond': [{'$lt': ['$m.e', -350]},
@@ -1061,7 +1049,7 @@ movetime_by_evaluation_pipeline = [
     {'$project': {'m.e': True, 'm.t': True}},
     {'$unwind': '$m'},
     {'$match': {'m.e': {'$exists': True}}},
-    {'$sample': {'size': 200000}},
+    {'$limit': 200000},
     {'$group': {'_id': {'$cond': [{'$lt': ['$m.e', -600]},
                                 1,
                                 {'$cond': [{'$lt': ['$m.e', -350]},
