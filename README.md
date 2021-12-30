@@ -1,5 +1,5 @@
 # Kaladin
-This machine learning tool is aimed at automating cheat detection on Lichess using insights (https://lichess.org/insights/{USER}).
+This machine learning tool is aimed at automating cheat detection on Lichess using insights ([example](https://lichess.org/insights/thibault)).
 
 It is built using CNNs on Keras/TensorFlow.
 
