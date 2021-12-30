@@ -81,7 +81,7 @@ min_moves, pipeline, metric, num_date_buckets, user_list_marked=False, marked_dt
         return df
 
     df_list = []
-    pipeline[1]['$sample']['size'] = max_games
+    pipeline[1]['$limit'] = max_games
     pipeline[4]['$sample']['size'] = max_moves
     for u, user in enumerate(user_list):
         latest_date = iterate_users(u, user, datagen_date, user_list_marked, marked_dt_dct)
@@ -123,7 +123,7 @@ user_eligibility_dct, pipeline, metric, user_list_marked=False, marked_dt_dct=No
         return 0
 
     df_list = []
-    pipeline[1]['$sample']['size'] = max_games
+    pipeline[1]['$limit'] = max_games
     pipeline[max_moves_ix]['$sample']['size'] = max_moves
 
     for u, user in enumerate(list(user_eligibility_dct.keys())):
@@ -164,7 +164,7 @@ user_list_marked=False, marked_dt_dct=None, overwrite_data=False):
         return 0
 
     df_list = []
-    pipeline[1]['$sample']['size'] = max_games
+    pipeline[1]['$limit'] = max_games
     pipeline[max_moves_ix]['$sample']['size'] = max_moves
     for u, user in enumerate(list(user_eligibility_dct.keys())):
         latest_date = iterate_users(u, user, datagen_date, user_list_marked, marked_dt_dct)
@@ -202,7 +202,7 @@ user_list_marked=False, marked_dt_dct=None, overwrite_data=False):
         return 0
 
     df_list = []
-    pipeline[1]['$sample']['size'] = max_games
+    pipeline[1]['$limit'] = max_games
     for u, user in enumerate(list(user_eligibility_dct.keys())):
         latest_date = iterate_users(u, user, datagen_date, user_list_marked, marked_dt_dct)
         if latest_date is None:
@@ -238,7 +238,7 @@ user_eligibility_dct, pipeline, metric, user_list_marked=False, marked_dt_dct=No
         return 0
 
     df_list = []
-    pipeline[1]['$sample']['size'] = max_games
+    pipeline[1]['$limit'] = max_games
     for u, user in enumerate(list(user_eligibility_dct.keys())):
         latest_date = iterate_users(u, user, datagen_date, user_list_marked, marked_dt_dct)
         if latest_date is None:
