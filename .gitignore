@@ -3,7 +3,7 @@
 poetry.lock
 /.vscode
 /.mypy_cache
-/kaladin_tuning*
+/src/kaladin_tuning*
 __pycache__/
 *.py[cod]
 *$py.class

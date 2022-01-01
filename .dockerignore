@@ -7,6 +7,7 @@
 !src/input_data/use_eval_0/insight_averages.pkl
 !src/input_data/use_eval_0/insight_bin_keys.pkl
 !src/input_data/use_eval_0/minmax_values_for_clipping.pkl
+!src/input_data/use_eval_0/data_dct*.pkl
 !src/**/*.py
 !requirements.txt
 !src/*.env
