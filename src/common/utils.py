@@ -8,7 +8,7 @@ import time
 
 from dotenv import dotenv_values
 from functools import partial, wraps
-from typing import Optional, Dict
+from typing import Callable, Dict, Optional
 
 def initialize_logging_for_modules(log: logging.Logger) -> None:
     config = load_config()
@@ -42,7 +42,7 @@ def unpickle_me(filename):
         return f
 
 def retry(
-    func=None,
+    func: Optional[Callable]=None,
     n_tries: Optional[int]=5,
     exception=Exception, 
     delay=30, 
@@ -114,9 +114,11 @@ def retry(
     return wrapper
 
 # Retry indefinitely mongo operations that failed due to connexion issues
-mongo_retry = partial(retry,
+def mongo_retry(log: logging.Logger) -> Callable:
+    return partial(retry,
             exception=pymongo.errors.ConnectionFailure,
             delay=30,
             backoff=1,
-            n_tries=None
+            n_tries=None,
+            log=log
             )
