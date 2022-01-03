@@ -81,8 +81,8 @@ min_moves, pipeline, metric, num_date_buckets, user_list_marked=False, marked_dt
         return df
 
     df_list = []
-    pipeline[1]['$limit'] = max_games
-    pipeline[4]['$limit'] = max_moves
+    pipeline[2]['$limit'] = max_games
+    pipeline[5]['$limit'] = max_moves
     for u, user in enumerate(user_list):
         latest_date = iterate_users(u, user, datagen_date, user_list_marked, marked_dt_dct)
         pipeline[0]['$match']['u'] = user
@@ -93,7 +93,7 @@ min_moves, pipeline, metric, num_date_buckets, user_list_marked=False, marked_dt
                 earliest_date = latest_date - datetime.timedelta(days=days)
                 pipeline[0]['$match']['p'] = tc
                 pipeline[0]['$match']['d'] = {'$lte':latest_date, '$gte':earliest_date}
-                pipeline[5]['$bucketAuto']['buckets'] = num_date_buckets[days]
+                pipeline[6]['$bucketAuto']['buckets'] = num_date_buckets[days]
                 q = list(insights.aggregate(pipeline))
                 if sum([row['nb'] for row in q]) < min_moves:
                     continue
@@ -123,7 +123,7 @@ user_eligibility_dct, pipeline, metric, user_list_marked=False, marked_dt_dct=No
         return 0
 
     df_list = []
-    pipeline[1]['$limit'] = max_games
+    pipeline[2]['$limit'] = max_games
     pipeline[max_moves_ix]['$limit'] = max_moves
 
     for u, user in enumerate(list(user_eligibility_dct.keys())):
@@ -164,7 +164,7 @@ user_list_marked=False, marked_dt_dct=None, overwrite_data=False):
         return 0
 
     df_list = []
-    pipeline[1]['$limit'] = max_games
+    pipeline[2]['$limit'] = max_games
     pipeline[max_moves_ix]['$limit'] = max_moves
     for u, user in enumerate(list(user_eligibility_dct.keys())):
         latest_date = iterate_users(u, user, datagen_date, user_list_marked, marked_dt_dct)
@@ -202,7 +202,7 @@ user_list_marked=False, marked_dt_dct=None, overwrite_data=False):
         return 0
 
     df_list = []
-    pipeline[1]['$limit'] = max_games
+    pipeline[2]['$limit'] = max_games
     for u, user in enumerate(list(user_eligibility_dct.keys())):
         latest_date = iterate_users(u, user, datagen_date, user_list_marked, marked_dt_dct)
         if latest_date is None:
@@ -212,7 +212,7 @@ user_list_marked=False, marked_dt_dct=None, overwrite_data=False):
             earliest_date = latest_date - datetime.timedelta(days=days)
             pipeline[0]['$match']['p'] = tc
             pipeline[0]['$match']['d'] = {'$lte':latest_date, '$gte':earliest_date}
-            pipeline[2]['$bucketAuto']['buckets'] = num_date_buckets[days]
+            pipeline[3]['$bucketAuto']['buckets'] = num_date_buckets[days]
             q = list(insights.aggregate(pipeline))
             for i, row in enumerate(q):
                 df_list.append([
@@ -238,7 +238,7 @@ user_eligibility_dct, pipeline, metric, user_list_marked=False, marked_dt_dct=No
         return 0
 
     df_list = []
-    pipeline[1]['$limit'] = max_games
+    pipeline[2]['$limit'] = max_games
     for u, user in enumerate(list(user_eligibility_dct.keys())):
         latest_date = iterate_users(u, user, datagen_date, user_list_marked, marked_dt_dct)
         if latest_date is None:
@@ -354,7 +354,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         datagen_date=datagen_date,
         max_games=max_games, 
         max_moves=max_moves,
-        max_moves_ix = 5,
+        max_moves_ix=6,
         user_eligibility_dct=user_eligibility_dct,
         pipeline=timevariance_by_date_pipeline,
         metric='timevariance_date',
@@ -373,7 +373,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         datagen_date=datagen_date,
         max_games=max_games, 
         max_moves=max_moves,
-        max_moves_ix=4,
+        max_moves_ix=5,
         user_eligibility_dct=user_eligibility_dct, 
         pipeline=blur_by_date_pipeline,
         metric='blur_date',
@@ -425,7 +425,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         datagen_date=datagen_date,
         max_games=max_games, 
         max_moves=max_moves,
-        max_moves_ix=5,
+        max_moves_ix=6,
         user_eligibility_dct=user_eligibility_dct, 
         pipeline=timevariance_by_movetime_pipeline,
         metric='timevariance_movetime', 
@@ -442,7 +442,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         datagen_date=datagen_date,
         max_games=max_games, 
         max_moves=max_moves,
-        max_moves_ix=4,
+        max_moves_ix=5,
         user_eligibility_dct=user_eligibility_dct, 
         pipeline=blur_by_movetime_pipeline,
         metric='blur_movetime', 
@@ -460,7 +460,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         datagen_date=datagen_date,
         max_games=max_games, 
         max_moves=max_moves,
-        max_moves_ix=4,
+        max_moves_ix=5,
         user_eligibility_dct=user_eligibility_dct, 
         pipeline=movetime_by_material_pipeline,
         metric='movetime_material', 
@@ -478,7 +478,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         datagen_date=datagen_date,
         max_games=max_games, 
         max_moves=max_moves,
-        max_moves_ix=5,
+        max_moves_ix=6,
         user_eligibility_dct=user_eligibility_dct, 
         pipeline=timevariance_by_material_pipeline,
         metric='timevariance_material',  
@@ -496,7 +496,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         datagen_date=datagen_date,
         max_games=max_games, 
         max_moves=max_moves,
-        max_moves_ix=4,
+        max_moves_ix=5,
         user_eligibility_dct=user_eligibility_dct, 
         pipeline=blur_by_material_pipeline,
         metric='blur_material',  
@@ -513,7 +513,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         datagen_date=datagen_date,
         max_games=max_games, 
         max_moves=max_moves,
-        max_moves_ix=5,
+        max_moves_ix=6,
         user_eligibility_dct=user_eligibility_dct, 
         pipeline=timevariance_by_phase_pipeline,
         metric='timevariance_phase', 
@@ -530,7 +530,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         datagen_date=datagen_date,
         max_games=max_games, 
         max_moves=max_moves,
-        max_moves_ix=4,
+        max_moves_ix=5,
         user_eligibility_dct=user_eligibility_dct, 
         pipeline=blur_by_phase_pipeline,
         metric='blur_phase', 
@@ -547,7 +547,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         datagen_date=datagen_date,
         max_games=max_games, 
         max_moves=max_moves,
-        max_moves_ix=4,
+        max_moves_ix=5,
         user_eligibility_dct=user_eligibility_dct, 
         pipeline=movetime_by_phase_pipeline,
         metric='movetime_phase', 
@@ -564,7 +564,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         datagen_date=datagen_date,
         max_games=max_games, 
         max_moves=max_moves,
-        max_moves_ix=5,
+        max_moves_ix=6,
         user_eligibility_dct=user_eligibility_dct, 
         pipeline=timevariance_by_blur_pipeline,
         metric='timevariance_blur', 
@@ -581,7 +581,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         datagen_date=datagen_date,
         max_games=max_games, 
         max_moves=max_moves,
-        max_moves_ix=4,
+        max_moves_ix=5,
         user_eligibility_dct=user_eligibility_dct, 
         pipeline=movetime_by_blur_pipeline,
         metric='movetime_blur', 
@@ -598,7 +598,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         datagen_date=datagen_date,
         max_games=max_games, 
         max_moves=max_moves,
-        max_moves_ix=5,
+        max_moves_ix=6,
         user_eligibility_dct=user_eligibility_dct, 
         pipeline=blur_by_timevariance_pipeline,
         metric='blur_timevariance', 
@@ -615,7 +615,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         datagen_date=datagen_date,
         max_games=max_games, 
         max_moves=max_moves,
-        max_moves_ix=5,
+        max_moves_ix=6,
         user_eligibility_dct=user_eligibility_dct, 
         pipeline=movetime_by_timevariance_pipeline,
         metric='movetime_timevariance', 
@@ -632,7 +632,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         datagen_date=datagen_date,
         max_games=max_games, 
         max_moves=max_moves,
-        max_moves_ix=5,
+        max_moves_ix=6,
         user_eligibility_dct=user_eligibility_dct, 
         pipeline=timevariance_by_result_pipeline,
         metric='timevariance_result', 
@@ -649,7 +649,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         datagen_date=datagen_date,
         max_games=max_games, 
         max_moves=max_moves,
-        max_moves_ix=4,
+        max_moves_ix=5,
         user_eligibility_dct=user_eligibility_dct, 
         pipeline=blur_by_result_pipeline,
         metric='blur_result', 
@@ -666,7 +666,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         datagen_date=datagen_date,
         max_games=max_games, 
         max_moves=max_moves,
-        max_moves_ix=5,
+        max_moves_ix=6,
         user_eligibility_dct=user_eligibility_dct, 
         pipeline=blurfiltered_by_result_pipeline,
         metric='blurfiltered_result', 
@@ -683,7 +683,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         datagen_date=datagen_date,
         max_games=max_games, 
         max_moves=max_moves,
-        max_moves_ix=4,
+        max_moves_ix=5,
         user_eligibility_dct=user_eligibility_dct, 
         pipeline=movetime_by_result_pipeline,
         metric='movetime_result', 
@@ -717,7 +717,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         datagen_date=datagen_date,
         max_games=max_games, 
         max_moves=max_moves,
-        max_moves_ix=4,
+        max_moves_ix=5,
         user_eligibility_dct=user_eligibility_dct, 
         pipeline=movetime_by_piecemoved_pipeline,
         metric='movetime_piecemoved', 
@@ -735,7 +735,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         datagen_date=datagen_date,
         max_games=max_games, 
         max_moves=max_moves,
-        max_moves_ix=5,
+        max_moves_ix=6,
         user_eligibility_dct=user_eligibility_dct, 
         pipeline=timevariance_by_piecemoved_pipeline,
         metric='timevariance_piecemoved',  
@@ -753,7 +753,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         datagen_date=datagen_date,
         max_games=max_games, 
         max_moves=max_moves,
-        max_moves_ix=4,
+        max_moves_ix=5,
         user_eligibility_dct=user_eligibility_dct, 
         pipeline=blur_by_piecemoved_pipeline,
         metric='blur_piecemoved',  
@@ -787,7 +787,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         datagen_date=datagen_date,
         max_games=max_games, 
         max_moves=max_moves,
-        max_moves_ix=4,
+        max_moves_ix=5,
         user_eligibility_dct=user_eligibility_dct, 
         pipeline=movetime_by_date_pipeline,
         metric='movetime_date',
@@ -806,7 +806,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         datagen_date=datagen_date,
         max_games=max_games, 
         max_moves=max_moves,
-        max_moves_ix=5,
+        max_moves_ix=6,
         user_eligibility_dct=user_eligibility_dct, 
         pipeline=acplfiltered_by_date_pipeline,
         metric='acplfiltered_date',
@@ -825,7 +825,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         datagen_date=datagen_date,
         max_games=max_games, 
         max_moves=max_moves,
-        max_moves_ix=4,
+        max_moves_ix=5,
         user_eligibility_dct=user_eligibility_dct, 
         pipeline=acpl_by_movetime_pipeline,
         metric='acpl_movetime', 
@@ -842,7 +842,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         datagen_date=datagen_date,
         max_games=max_games, 
         max_moves=max_moves,
-        max_moves_ix=4,
+        max_moves_ix=5,
         user_eligibility_dct=user_eligibility_dct, 
         pipeline=acpl_by_phase_pipeline,
         metric='acpl_phase', 
@@ -860,7 +860,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         datagen_date=datagen_date,
         max_games=max_games, 
         max_moves=max_moves,
-        max_moves_ix=4,
+        max_moves_ix=5,
         user_eligibility_dct=user_eligibility_dct, 
         pipeline=acpl_by_material_pipeline,
         metric='acpl_material',  
@@ -877,7 +877,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         datagen_date=datagen_date,
         max_games=max_games, 
         max_moves=max_moves,
-        max_moves_ix=4,
+        max_moves_ix=5,
         user_eligibility_dct=user_eligibility_dct, 
         pipeline=acpl_by_blur_pipeline,
         metric='acpl_blur', 
@@ -894,7 +894,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         datagen_date=datagen_date,
         max_games=max_games, 
         max_moves=max_moves,
-        max_moves_ix=5,
+        max_moves_ix=6,
         user_eligibility_dct=user_eligibility_dct, 
         pipeline=acplfiltered_by_blur_pipeline,
         metric='acplfiltered_blur', 
@@ -911,7 +911,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         datagen_date=datagen_date,
         max_games=max_games, 
         max_moves=max_moves,
-        max_moves_ix=5,
+        max_moves_ix=6,
         user_eligibility_dct=user_eligibility_dct, 
         pipeline=acpl_by_timevariance_pipeline,
         metric='acpl_timevariance', 
@@ -928,7 +928,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         datagen_date=datagen_date,
         max_games=max_games, 
         max_moves=max_moves,
-        max_moves_ix=4,
+        max_moves_ix=5,
         user_eligibility_dct=user_eligibility_dct, 
         pipeline=acpl_by_result_pipeline,
         metric='acpl_result', 
@@ -946,7 +946,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         datagen_date=datagen_date,
         max_games=max_games, 
         max_moves=max_moves,
-        max_moves_ix=4,
+        max_moves_ix=5,
         user_eligibility_dct=user_eligibility_dct, 
         pipeline=acpl_by_piecemoved_pipeline,
         metric='acpl_piecemoved',  
@@ -964,7 +964,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         datagen_date=datagen_date,
         max_games=max_games, 
         max_moves=max_moves,
-        max_moves_ix=5,
+        max_moves_ix=6,
         user_eligibility_dct=user_eligibility_dct, 
         pipeline=movetime_by_evaluation_pipeline,
         metric='movetime_evaluation', 
@@ -982,7 +982,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         datagen_date=datagen_date,
         max_games=max_games, 
         max_moves=max_moves,
-        max_moves_ix=5,
+        max_moves_ix=6,
         user_eligibility_dct=user_eligibility_dct, 
         pipeline=acpl_by_evaluation_pipeline,
         metric='acpl_evaluation',  
@@ -1000,7 +1000,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         datagen_date=datagen_date,
         max_games=max_games, 
         max_moves=max_moves,
-        max_moves_ix=5,
+        max_moves_ix=6,
         user_eligibility_dct=user_eligibility_dct, 
         pipeline=timevariance_by_evaluation_pipeline,
         metric='timevariance_evaluation',  
@@ -1018,7 +1018,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         datagen_date=datagen_date,
         max_games=max_games, 
         max_moves=max_moves,
-        max_moves_ix=5,
+        max_moves_ix=6,
         user_eligibility_dct=user_eligibility_dct, 
         pipeline=blur_by_evaluation_pipeline,
         metric='blur_evaluation',  
@@ -1036,7 +1036,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         datagen_date=datagen_date,
         max_games=max_games, 
         max_moves=max_moves,
-        max_moves_ix=5,
+        max_moves_ix=6,
         user_eligibility_dct=user_eligibility_dct, 
         pipeline=timevariance_by_centipawnloss_pipeline,
         metric='timevariance_centipawnloss',  
@@ -1054,7 +1054,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         datagen_date=datagen_date,
         max_games=max_games, 
         max_moves=max_moves,
-        max_moves_ix=5,
+        max_moves_ix=6,
         user_eligibility_dct=user_eligibility_dct, 
         pipeline=blur_by_centipawnloss_pipeline,
         metric='blur_centipawnloss',  
@@ -1072,7 +1072,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         datagen_date=datagen_date,
         max_games=max_games, 
         max_moves=max_moves,
-        max_moves_ix=5,
+        max_moves_ix=6,
         user_eligibility_dct=user_eligibility_dct, 
         pipeline=movetime_by_centipawnloss_pipeline,
         metric='movetime_centipawnloss', 

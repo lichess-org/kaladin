@@ -5,6 +5,7 @@ movetime_by_material_pipeline = [
             "u":"placeholder"
       }
    },
+   {'$sort': {'d': -1}},
    {'$limit': 10000},
    {
       "$project":{   # what you will see at the end
@@ -128,6 +129,7 @@ timevariance_by_date_pipeline = [
             "u" : "dev"
         }
     },
+    {'$sort': {'d': -1}},
     {'$limit': 10000},
     {
         "$project" : {
@@ -170,6 +172,7 @@ timevariance_by_date_pipeline = [
 
 acpl_by_date_pipeline = [
     {'$match': {'a': True, 'u': 'dev'}},
+    {'$sort': {'d': -1}},
     {'$limit': 10000},
     {'$project': {'d': True, 'm.c': True}},
     {'$unwind': '$m'},
@@ -181,6 +184,7 @@ acpl_by_date_pipeline = [
 
 acplfiltered_by_date_pipeline = [
     {'$match': {'a': True, 'u': 'dev'}},
+    {'$sort': {'d': -1}},
     {'$limit': 10000},
     {'$project': {
         'd': True, 
@@ -206,6 +210,7 @@ acpl_by_variant_pipeline = [
             "a" : True
         }
     },
+    {'$sort': {'d': -1}},
     {'$limit': 10000},
     {
         "$project" : {
@@ -232,6 +237,7 @@ acpl_by_variant_pipeline = [
 
 acpl_by_material_pipeline = [
     {'$match': {'a': True, 'u': 'dev'}},
+    {'$sort': {'d': -1}},
     {'$limit': 10000},
     {'$project': {'m.c': True, 'm.i': True}},
     {'$unwind': '$m'},
@@ -264,6 +270,7 @@ acpl_by_material_pipeline = [
 
 acpl_by_blur_pipeline = [
     {'$match': {'a': True, 'u': 'dev'}},
+    {'$sort': {'d': -1}},
     {'$limit': 10000},
     {'$project': {'m.b': True, 'm.c': True}},
     {'$unwind': '$m'},
@@ -275,6 +282,7 @@ acpl_by_blur_pipeline = [
 
 acplfiltered_by_blur_pipeline = [
     {'$match': {'a': True, 'u': 'dev'}},
+    {'$sort': {'d': -1}},
     {'$limit': 10000},
     {'$project': {'m.b': True,
                 'm.c': True,
@@ -298,6 +306,7 @@ acplfiltered_by_blur_pipeline = [
 
 acpl_by_timevariance_pipeline = [
     {'$match': {'a': True, 'u': 'dev'}},
+    {'$sort': {'d': -1}},
     {'$limit': 10000},
     {'$project': {'m.c': True, 'm.v': True}},
     {'$unwind': '$m'},
@@ -319,6 +328,7 @@ acpl_by_timevariance_pipeline = [
 
 acpl_by_phase_pipeline = [
     {'$match': {'a': True, 'u': 'dev'}},
+    {'$sort': {'d': -1}},
     {'$limit': 10000},
     {'$project': {'m.c': True, 'm.p': True}},
     {'$unwind': '$m'},
@@ -331,6 +341,7 @@ acpl_by_phase_pipeline = [
 
 acpl_by_movetime_pipeline = [
     {'$match': {'a': True, 'u': 'dev'}},
+    {'$sort': {'d': -1}},
     {'$limit': 10000},
     {'$project': {'m.c': True, 'm.t': True}},
     {'$unwind': '$m'},
@@ -354,6 +365,7 @@ acpl_by_movetime_pipeline = [
 
 movetime_by_piecemoved_pipeline = [
     {'$match': {'u': 'dev'}},
+    {'$sort': {'d': -1}},
     {'$limit': 10000},
     {'$project': {'m.r': True, 'm.t': True}},
     {'$unwind': '$m'},
@@ -366,6 +378,7 @@ movetime_by_piecemoved_pipeline = [
 
 timevariance_by_material_pipeline = [
     {'$match': {'u': 'dev'}},
+    {'$sort': {'d': -1}},
     {'$limit': 10000},
     {'$project': {'m.i': True, 'm.v': True}},
     {'$unwind': '$m'},
@@ -399,6 +412,7 @@ timevariance_by_material_pipeline = [
 
 timevariance_by_result_pipeline = [
     {'$match': {'u': 'dev'}},
+    {'$sort': {'d': -1}},
     {'$limit': 10000},
     {'$project': {'m.v': True, 'r': True}},
     {'$unwind': '$m'},
@@ -411,6 +425,7 @@ timevariance_by_result_pipeline = [
 
 blur_by_result_pipeline = [
     {'$match': {'u': 'dev'}},
+    {'$sort': {'d': -1}},
     {'$limit': 10000},
     {'$project': {'m.b': True, 'r': True}},
     {'$unwind': '$m'},
@@ -424,6 +439,7 @@ blur_by_result_pipeline = [
 
 blurfiltered_by_result_pipeline = [
     {'$match': {'u': 'dev'}},
+    {'$sort': {'d': -1}},
     {'$limit': 10000},
     {'$project': {
         'm.b': True, 
@@ -447,6 +463,7 @@ blurfiltered_by_result_pipeline = [
 
 blur_by_movetime_pipeline = [
     {'$match': {'u': 'dev'}},
+    {'$sort': {'d': -1}},
     {'$limit': 10000},
     {'$project': {'m.b': True, 'm.t': True}},
     {'$unwind': '$m'},
@@ -472,6 +489,7 @@ blur_by_movetime_pipeline = [
 
 blur_by_date_pipeline = [
     {'$match': {'u': 'dev'}},
+    {'$sort': {'d': -1}},
     {'$limit': 10000},
     {'$project': {'d': True, 'm.b': True}},
     {'$unwind': '$m'},
@@ -487,6 +505,7 @@ blur_by_date_pipeline = [
 
 movetime_by_date_pipeline = [
     {'$match': {'u': 'dev'}},
+    {'$sort': {'d': -1}},
     {'$limit': 10000},
     {'$project': {'d': True, 'm.t': True}},
     {'$unwind': '$m'},
@@ -501,6 +520,7 @@ movetime_by_date_pipeline = [
 
 opponentrating_by_date_pipeline = [
     {'$match': {'pr': {'$ne': True}, 'u': 'dev'}},
+    {'$sort': {'d': -1}},
     {'$limit': 10000},
     {'$bucketAuto': {'buckets': 12,
                     'groupBy': '$d',
@@ -512,6 +532,7 @@ opponentrating_by_date_pipeline = [
 
 ratinggain_by_date_pipeline = [
     {'$match': {'pr': {'$ne': True}, 'u': 'dev'}},
+    {'$sort': {'d': -1}},
     {'$limit': 10000},
     {'$bucketAuto': {'buckets': 12,
                     'groupBy': '$d',
@@ -523,6 +544,7 @@ ratinggain_by_date_pipeline = [
 
 timevariance_by_movetime_pipeline = [
     {'$match': {'u': 'dev'}},
+    {'$sort': {'d': -1}},
     {'$limit': 10000},
     {'$project': {'m.t': True, 'm.v': True}},
     {'$unwind': '$m'},
@@ -548,6 +570,7 @@ timevariance_by_movetime_pipeline = [
 
 blur_by_material_pipeline = [
     {'$match': {'u': 'dev'}},
+    {'$sort': {'d': -1}},
     {'$limit': 10000},
     {'$project': {'m.b': True, 'm.i': True}},
     {'$unwind': '$m'},
@@ -582,6 +605,7 @@ blur_by_material_pipeline = [
 
 timevariance_by_phase_pipeline = [
     {'$match': {'u': 'dev'}},
+    {'$sort': {'d': -1}},
     {'$limit': 10000},
     {'$project': {'m.p': True, 'm.v': True}},
     {'$unwind': '$m'},
@@ -595,6 +619,7 @@ timevariance_by_phase_pipeline = [
 
 blur_by_phase_pipeline = [
     {'$match': {'u': 'dev'}},
+    {'$sort': {'d': -1}},
     {'$limit': 10000},
     {'$project': {'m.b': True, 'm.p': True}},
     {'$unwind': '$m'},
@@ -608,6 +633,7 @@ blur_by_phase_pipeline = [
 
 movetime_by_phase_pipeline = [
     {'$match': {'u': 'dev'}},
+    {'$sort': {'d': -1}},
     {'$limit': 10000},
     {'$project': {'m.p': True, 'm.t': True}},
     {'$unwind': '$m'},
@@ -620,6 +646,7 @@ movetime_by_phase_pipeline = [
 
 timevariance_by_blur_pipeline = [
     {'$match': {'u': 'dev'}},
+    {'$sort': {'d': -1}},
     {'$limit': 10000},
     {'$project': {'m.b': True, 'm.v': True}},
     {'$unwind': '$m'},
@@ -633,6 +660,7 @@ timevariance_by_blur_pipeline = [
  
 movetime_by_blur_pipeline = [
     {'$match': {'u': 'dev'}},
+    {'$sort': {'d': -1}},
     {'$limit': 10000},
     {'$project': {'m.b': True, 'm.t': True}},
     {'$unwind': '$m'},
@@ -645,6 +673,7 @@ movetime_by_blur_pipeline = [
 
 blur_by_timevariance_pipeline = [
     {'$match': {'u': 'dev'}},
+    {'$sort': {'d': -1}},
     {'$limit': 10000},
     {'$project': {'m.b': True, 'm.v': True}},
     {'$unwind': '$m'},
@@ -668,6 +697,7 @@ blur_by_timevariance_pipeline = [
 
 movetime_by_timevariance_pipeline = [
     {'$match': {'u': 'dev'}},
+    {'$sort': {'d': -1}},
     {'$limit': 10000},
     {'$project': {'m.t': True, 'm.v': True}},
     {'$unwind': '$m'},
@@ -690,6 +720,7 @@ movetime_by_timevariance_pipeline = [
 
 acpl_by_result_pipeline = [
     {'$match': {'a': True, 'u': 'dev'}},
+    {'$sort': {'d': -1}},
     {'$limit': 10000},
     {'$project': {'m.c': True, 'r': True}},
     {'$unwind': '$m'},
@@ -702,6 +733,7 @@ acpl_by_result_pipeline = [
 
 movetime_by_result_pipeline = [
     {'$match': {'u': 'dev'}},
+    {'$sort': {'d': -1}},
     {'$limit': 10000},
     {'$project': {'m.t': True, 'r': True}},
     {'$unwind': '$m'},
@@ -714,6 +746,7 @@ movetime_by_result_pipeline = [
 
 opponentrating_by_result_pipeline = [
     {'$match': {'pr': {'$ne': True}, 'u': 'dev'}},
+    {'$sort': {'d': -1}},
     {'$limit': 10000},
     {'$group': {'_id': '$r',
                 'nb': {'$sum': 1},
@@ -723,6 +756,7 @@ opponentrating_by_result_pipeline = [
 
 acpl_by_opponentstrength_pipeline = [
     {'$match': {'a': True, 'pr': {'$ne': True}, 'u': 'dev'}},
+    {'$sort': {'d': -1}},
     {'$limit': 10000},
     {'$project': {'m.c': True, 'os': True}},
     {'$unwind': '$m'},
@@ -735,6 +769,7 @@ acpl_by_opponentstrength_pipeline = [
 
 timevariance_by_opponentstrength_pipeline = [
     {'$match': {'pr': {'$ne': True}, 'u': 'dev'}},
+    {'$sort': {'d': -1}},
     {'$limit': 10000},
     {'$project': {'m.v': True, 'os': True}},
     {'$unwind': '$m'},
@@ -748,6 +783,7 @@ timevariance_by_opponentstrength_pipeline = [
 
 blur_by_opponentstrength_pipeline = [
     {'$match': {'pr': {'$ne': True}, 'u': 'dev'}},
+    {'$sort': {'d': -1}},
     {'$limit': 10000},
     {'$project': {'m.b': True, 'os': True}},
     {'$unwind': '$m'},
@@ -761,6 +797,7 @@ blur_by_opponentstrength_pipeline = [
 
 movetime_by_opponentstrength_pipeline = [
     {'$match': {'pr': {'$ne': True}, 'u': 'dev'}},
+    {'$sort': {'d': -1}},
     {'$limit': 10000},
     {'$project': {'m.t': True, 'os': True}},
     {'$unwind': '$m'},
@@ -773,6 +810,7 @@ movetime_by_opponentstrength_pipeline = [
 
 ratinggain_by_opponentstrength_pipeline = [
     {'$match': {'pr': {'$ne': True}, 'u': 'dev'}},
+    {'$sort': {'d': -1}},
     {'$limit': 10000},
     {'$group': {'_id': '$os',
                 'nb': {'$sum': 1},
@@ -782,6 +820,7 @@ ratinggain_by_opponentstrength_pipeline = [
 
 timevariance_by_centipawnloss_pipeline = [
     {'$match': {'u': 'dev'}},
+    {'$sort': {'d': -1}},
     {'$limit': 10000},
     {'$project': {'m.c': True, 'm.v': True}},
     {'$unwind': '$m'},
@@ -816,6 +855,7 @@ timevariance_by_centipawnloss_pipeline = [
 
 blur_by_centipawnloss_pipeline = [
     {'$match': {'u': 'dev'}},
+    {'$sort': {'d': -1}},
     {'$limit': 10000},
     {'$project': {'m.b': True, 'm.c': True}},
     {'$unwind': '$m'},
@@ -851,6 +891,7 @@ blur_by_centipawnloss_pipeline = [
 
 movetime_by_centipawnloss_pipeline = [
     {'$match': {'u': 'dev'}},
+    {'$sort': {'d': -1}},
     {'$limit': 10000},
     {'$project': {'m.c': True, 'm.t': True}},
     {'$unwind': '$m'},
@@ -885,6 +926,7 @@ movetime_by_centipawnloss_pipeline = [
 
 acpl_by_piecemoved_pipeline = [
     {'$match': {'a': True, 'u': 'dev'}},
+    {'$sort': {'d': -1}},
     {'$limit': 10000},
     {'$project': {'m.c': True, 'm.r': True}},
     {'$unwind': '$m'},
@@ -897,6 +939,7 @@ acpl_by_piecemoved_pipeline = [
 
 timevariance_by_piecemoved_pipeline = [
     {'$match': {'u': 'dev'}},
+    {'$sort': {'d': -1}},
     {'$limit': 10000},
     {'$project': {'m.r': True, 'm.v': True}},
     {'$unwind': '$m'},
@@ -910,6 +953,7 @@ timevariance_by_piecemoved_pipeline = [
 
 blur_by_piecemoved_pipeline = [
     {'$match': {'u': 'dev'}},
+    {'$sort': {'d': -1}},
     {'$limit': 10000},
     {'$project': {'m.b': True, 'm.r': True}},
     {'$unwind': '$m'},
@@ -923,6 +967,7 @@ blur_by_piecemoved_pipeline = [
 
 acpl_by_evaluation_pipeline = [
     {'$match': {'a': True, 'u': 'dev'}},
+    {'$sort': {'d': -1}},
     {'$limit': 10000},
     {'$project': {'m.c': True, 'm.e': True}},
     {'$unwind': '$m'},
@@ -963,6 +1008,7 @@ acpl_by_evaluation_pipeline = [
 
 timevariance_by_evaluation_pipeline = [
     {'$match': {'a': True, 'u': 'dev'}},
+    {'$sort': {'d': -1}},
     {'$limit': 10000},
     {'$project': {'m.e': True, 'm.v': True}},
     {'$unwind': '$m'},
@@ -1004,6 +1050,7 @@ timevariance_by_evaluation_pipeline = [
 
 blur_by_evaluation_pipeline = [
     {'$match': {'a': True, 'u': 'dev'}},
+    {'$sort': {'d': -1}},
     {'$limit': 10000},
     {'$project': {'m.b': True, 'm.e': True}},
     {'$unwind': '$m'},
@@ -1045,6 +1092,7 @@ blur_by_evaluation_pipeline = [
 
 movetime_by_evaluation_pipeline = [
     {'$match': {'a': True, 'u': 'dev'}},
+    {'$sort': {'d': -1}},
     {'$limit': 10000},
     {'$project': {'m.e': True, 'm.t': True}},
     {'$unwind': '$m'},
