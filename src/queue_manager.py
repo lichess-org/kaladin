@@ -175,7 +175,7 @@ class QueueManager:
     @mongo_retry(log=log)
     def updateQueue(self, analysed_users: List[BDoc]) -> None:
         # update queue, bulk write should be much faster for huge batch
-        operations = [pymogno.UpdateOne({'_id': user['_id']}, {'$set': {'response': user['response']}}) for user in analysed_users]
+        operations = [pymongo.UpdateOne({'_id': user['_id']}, {'$set': {'response': user['response']}}) for user in analysed_users]
         self.kaladin_queue_coll.bulk_write(operations)
 
 
