@@ -2,13 +2,15 @@ import pymongo
 import pickle
 import time
 import os
+import random
 
 from queue_manager import QueueManager 
 
 if __name__ == '__main__':
     qm = QueueManager() # just to access collection, TODO isolate Db in it's own class
     ids = qm.insights_coll.distinct("u")
-    print(ids)
+    random.shuffle(ids)
+    ids = ids[:10]
     results = {x:[] for x in ids} # ids -> [activation]
     for i in range(10):
         qm.kaladin_queue_coll.drop()
@@ -21,10 +23,12 @@ if __name__ == '__main__':
                 bdoc = qm.kaladin_queue_coll.find_one({'_id': _id})
                 resp = bdoc.get('response')
                 if resp is not None:
-                    activation = resp['pred']['activation']
-                    results[_id].append(activation)
+                    if 'err' not in resp:
+                        activation = resp['pred']['activation']
+                        results[_id].append(activation)
                 else:
                     time.sleep(2)
             print(results)
     for _id in ids:
-        print(f"{_id}, min: {min(results[_id])}, max: {max(results[_id])}")
+        if results[_id]:
+            print(f"{_id}, min: {min(results[_id])}, max: {max(results[_id])}")
