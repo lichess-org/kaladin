@@ -31,7 +31,7 @@ def build_data(insights, user_collection, live, live_user_list=None):
    
     if live:
         # Set date to now
-        datagen_date = datetime.utcnow()
+        datagen_date = datetime.datetime.utcnow()
     else:
         # Index fields
         insights.create_index([('u', 1)])
