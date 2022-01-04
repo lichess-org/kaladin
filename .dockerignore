@@ -10,6 +10,6 @@
 !src/input_data/use_eval_0/data_dct*.pkl
 !src/**/*.py
 !requirements.txt
-!src/*.env
+!src/.env
 !src/.env.base
 !src/start.sh
