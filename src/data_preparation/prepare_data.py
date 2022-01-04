@@ -28,11 +28,16 @@ def build_data(insights, user_collection, live, live_user_list=None):
     overwrite_traintest_users = False   # Must be True for new mongodb training collections, otherwise False for speedup
     overwrite_user_eligiblity_dct = False # Must be True for new mongodb training collections, other False for speedup
 
-    # Index fields
-    if not live:
+   
+    if live:
+        # Set date to now
+        datagen_date = datetime.utcnow()
+    else:
+        # Index fields
         insights.create_index([('u', 1)])
         insights.create_index([('d', 1)])
         insights.create_index([('p', 1)])
+
 
     # Build dictionary of marked users
     marked_dt_dct = create_marked_dt_dct(user_collection, live=live)
