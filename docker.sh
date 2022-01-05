@@ -12,6 +12,7 @@ then
 	docker build --build-arg TARGET="" -t kaladin-tensorflow-jupyter:2.4.1-jupyter "$docker_sh_abs_path" && \
 	docker run -it --rm \
 	--network=host \
+	--name=kaladin \
 	kaladin-tensorflow-jupyter:2.4.1-jupyter "$@"
 elif [ "$target" = "gpu" ]
 then
@@ -19,6 +20,7 @@ then
 	docker run -it --rm \
 	--network=host \
 	--gpus all \
+	--name=kaladin \
 	kaladin-tensorflow-jupyter:2.4.1-gpu-jupyter "$@"
 else
 	echo "target can only be cpu or gpu, not $target"
