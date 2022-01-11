@@ -143,7 +143,7 @@ class QueueManager:
                 user_data = response[user_dict['_id']]
                 # temp fix until retraining
                 if 'ratingDiff/date' in user_data['insight_1']:
-                    user_data['pred'] -= 0.05
+                    user_data['pred'] = max(0, user_data['pred'] - 0.05)
                 # temp fix end
                 user_inner_response = {
                     'activation': user_data['pred'], 
