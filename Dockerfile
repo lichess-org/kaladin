@@ -5,7 +5,7 @@ FROM tensorflow/tensorflow:2.4.1$TARGET-jupyter
 RUN apt-get update
 
 # create Kaladin user
-RUN useradd kaladin && \
+RUN useradd kaladin -u 1002 && \
 apt-get install sudo && \
 usermod -aG sudo kaladin && \
 # Disable sudo login for the new kaladin user.
