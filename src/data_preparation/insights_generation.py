@@ -9,19 +9,19 @@ import logging
 log = logging.getLogger(__file__)
 initialize_logging_for_modules(log)
 
-def iterate_users(u, user, datagen_date, user_list_marked, marked_dt_dct):
+def iterate_users(u, user, tc_list, user_list_marked, player_dt_dct):
     if u % 500 == 0:
         log.debug("Processed {} users.".format(u))
 
     if user_list_marked:
         try:
-            latest_date = marked_dt_dct[user]
+            latest_date_dct = {tc:player_dt_dct[user][tc] for tc in tc_list}
         except KeyError:
             return None
     else:
-        latest_date = datagen_date
+        latest_date_dct = {tc:player_dt_dct[user][tc] for tc in tc_list}
     
-    return latest_date
+    return latest_date_dct
 
 def build_eligible_player_dct(acpl_date_cheat_df, acpl_date_legit_df, tc_list, num_date_buckets):
     eligible_player_dct = {tc:{days:[] for days in num_date_buckets.keys()} for tc in tc_list}
@@ -73,8 +73,8 @@ def define_user_lists(insights, user_collection, live=0, live_user_list=None):
     return legit_users, cheat_users
 
 
-def first_insight(insights, live, fdir, user_list, tc_list, days_list, datagen_date, max_games, max_moves, 
-min_moves, pipeline, metric, num_date_buckets, user_list_marked=False, marked_dt_dct=None, overwrite_data=False):
+def first_insight(insights, live, fdir, user_list, tc_list, days_list, max_games, max_moves, 
+min_moves, pipeline, metric, num_date_buckets, user_list_marked=False, player_dt_dct=None, overwrite_data=False):
     fname = '{}/{}_{}.pkl'.format(fdir, metric, bool(user_list_marked))
     if os.path.isfile(fname) and not overwrite_data:
         df = unpickle_me(fname)
@@ -84,15 +84,15 @@ min_moves, pipeline, metric, num_date_buckets, user_list_marked=False, marked_dt
     pipeline[2]['$limit'] = max_games
     pipeline[5]['$limit'] = max_moves
     for u, user in enumerate(user_list):
-        latest_date = iterate_users(u, user, datagen_date, user_list_marked, marked_dt_dct)
+        latest_date_dct = iterate_users(u, user, tc_list, user_list_marked, player_dt_dct)
         pipeline[0]['$match']['u'] = user
-        if latest_date is None:
+        if latest_date_dct is None:
             continue
         for tc in tc_list:
             for days in days_list:
-                earliest_date = latest_date - datetime.timedelta(days=days)
+                earliest_date = latest_date_dct[tc] - datetime.timedelta(days=days)
                 pipeline[0]['$match']['p'] = tc
-                pipeline[0]['$match']['d'] = {'$lte':latest_date, '$gte':earliest_date}
+                pipeline[0]['$match']['d'] = {'$lte':latest_date_dct[tc], '$gte':earliest_date}
                 pipeline[6]['$bucketAuto']['buckets'] = num_date_buckets[days]
                 q = list(insights.aggregate(pipeline))
                 if sum([row['nb'] for row in q]) < min_moves:
@@ -116,8 +116,8 @@ min_moves, pipeline, metric, num_date_buckets, user_list_marked=False, marked_dt
         pickle_me(df, fname)
         return df
 
-def metric_dimension(insights, live, fdir, datagen_date, max_games, max_moves, max_moves_ix,
-user_eligibility_dct, pipeline, metric, user_list_marked=False, marked_dt_dct=None, overwrite_data=False):
+def metric_dimension(insights, live, fdir, tc_list, max_games, max_moves, max_moves_ix,
+user_eligibility_dct, pipeline, metric, user_list_marked=False, player_dt_dct=None, overwrite_data=False):
     fname = '{}/{}_{}.pkl'.format(fdir, metric, bool(user_list_marked))
     if os.path.isfile(fname) and not overwrite_data:
         return 0
@@ -127,14 +127,14 @@ user_eligibility_dct, pipeline, metric, user_list_marked=False, marked_dt_dct=No
     pipeline[max_moves_ix]['$limit'] = max_moves
 
     for u, user in enumerate(list(user_eligibility_dct.keys())):
-        latest_date = iterate_users(u, user, datagen_date, user_list_marked, marked_dt_dct)
-        if latest_date is None:
+        latest_date_dct = iterate_users(u, user, tc_list, user_list_marked, player_dt_dct)
+        if latest_date_dct is None:
             continue
         pipeline[0]['$match']['u'] = user
         for tc, days in user_eligibility_dct[user]:
-            earliest_date = latest_date - datetime.timedelta(days=days)
+            earliest_date = latest_date_dct[tc] - datetime.timedelta(days=days)
             pipeline[0]['$match']['p'] = tc
-            pipeline[0]['$match']['d'] = {'$lte':latest_date, '$gte':earliest_date}
+            pipeline[0]['$match']['d'] = {'$lte':latest_date_dct[tc], '$gte':earliest_date}
             q = list(insights.aggregate(pipeline))
             for row in q:
                 df_list.append([
@@ -156,9 +156,9 @@ user_eligibility_dct, pipeline, metric, user_list_marked=False, marked_dt_dct=No
     else:
         pickle_me(df, fname)
 
-def move_metric_date(insights, live, fdir, datagen_date, max_games, max_moves, max_moves_ix,
+def move_metric_date(insights, live, fdir, tc_list, max_games, max_moves, max_moves_ix,
 user_eligibility_dct, pipeline, metric, num_date_buckets,
-user_list_marked=False, marked_dt_dct=None, overwrite_data=False):
+user_list_marked=False, player_dt_dct=None, overwrite_data=False):
     fname = '{}/{}_{}.pkl'.format(fdir, metric, bool(user_list_marked))
     if os.path.isfile(fname) and not overwrite_data:
         return 0
@@ -167,14 +167,14 @@ user_list_marked=False, marked_dt_dct=None, overwrite_data=False):
     pipeline[2]['$limit'] = max_games
     pipeline[max_moves_ix]['$limit'] = max_moves
     for u, user in enumerate(list(user_eligibility_dct.keys())):
-        latest_date = iterate_users(u, user, datagen_date, user_list_marked, marked_dt_dct)
-        if latest_date is None:
+        latest_date_dct = iterate_users(u, user, tc_list, user_list_marked, player_dt_dct)
+        if latest_date_dct is None:
             continue
         pipeline[0]['$match']['u'] = user
         for tc, days in user_eligibility_dct[user]:
-            earliest_date = latest_date - datetime.timedelta(days=days)
+            earliest_date = latest_date_dct[tc] - datetime.timedelta(days=days)
             pipeline[0]['$match']['p'] = tc
-            pipeline[0]['$match']['d'] = {'$lte':latest_date, '$gte':earliest_date}
+            pipeline[0]['$match']['d'] = {'$lte':latest_date_dct[tc], '$gte':earliest_date}
             pipeline[max_moves_ix+1]['$bucketAuto']['buckets'] = num_date_buckets[days]
             q = list(insights.aggregate(pipeline))
             for i, row in enumerate(q):
@@ -194,9 +194,9 @@ user_list_marked=False, marked_dt_dct=None, overwrite_data=False):
     else:
         pickle_me(df, fname)
 
-def game_metric_date(insights, live, fdir, datagen_date, max_games,
+def game_metric_date(insights, live, fdir, tc_list, max_games,
 user_eligibility_dct, pipeline, metric, num_date_buckets, 
-user_list_marked=False, marked_dt_dct=None, overwrite_data=False):
+user_list_marked=False, player_dt_dct=None, overwrite_data=False):
     fname = '{}/{}_{}.pkl'.format(fdir, metric, bool(user_list_marked))
     if os.path.isfile(fname) and not overwrite_data:
         return 0
@@ -204,14 +204,14 @@ user_list_marked=False, marked_dt_dct=None, overwrite_data=False):
     df_list = []
     pipeline[2]['$limit'] = max_games
     for u, user in enumerate(list(user_eligibility_dct.keys())):
-        latest_date = iterate_users(u, user, datagen_date, user_list_marked, marked_dt_dct)
-        if latest_date is None:
+        latest_date_dct = iterate_users(u, user, tc_list, user_list_marked, player_dt_dct)
+        if latest_date_dct is None:
             continue
         pipeline[0]['$match']['u'] = user
         for tc, days in user_eligibility_dct[user]:
-            earliest_date = latest_date - datetime.timedelta(days=days)
+            earliest_date = latest_date_dct[tc] - datetime.timedelta(days=days)
             pipeline[0]['$match']['p'] = tc
-            pipeline[0]['$match']['d'] = {'$lte':latest_date, '$gte':earliest_date}
+            pipeline[0]['$match']['d'] = {'$lte':latest_date_dct[tc], '$gte':earliest_date}
             pipeline[3]['$bucketAuto']['buckets'] = num_date_buckets[days]
             q = list(insights.aggregate(pipeline))
             for i, row in enumerate(q):
@@ -231,8 +231,8 @@ user_list_marked=False, marked_dt_dct=None, overwrite_data=False):
     else:
         pickle_me(df, fname)
 
-def game_metric_dimension(insights, live, fdir, datagen_date, max_games,
-user_eligibility_dct, pipeline, metric, user_list_marked=False, marked_dt_dct=None, overwrite_data=False):
+def game_metric_dimension(insights, live, fdir, tc_list, max_games,
+user_eligibility_dct, pipeline, metric, user_list_marked=False, player_dt_dct=None, overwrite_data=False):
     fname = '{}/{}_{}.pkl'.format(fdir, metric, bool(user_list_marked))
     if os.path.isfile(fname) and not overwrite_data:
         return 0
@@ -240,14 +240,14 @@ user_eligibility_dct, pipeline, metric, user_list_marked=False, marked_dt_dct=No
     df_list = []
     pipeline[2]['$limit'] = max_games
     for u, user in enumerate(list(user_eligibility_dct.keys())):
-        latest_date = iterate_users(u, user, datagen_date, user_list_marked, marked_dt_dct)
-        if latest_date is None:
+        latest_date_dct = iterate_users(u, user, tc_list, user_list_marked, player_dt_dct)
+        if latest_date_dct is None:
             continue
         pipeline[0]['$match']['u'] = user
         for tc, days in user_eligibility_dct[user]:
-            earliest_date = latest_date - datetime.timedelta(days=days)
+            earliest_date = latest_date_dct[tc] - datetime.timedelta(days=days)
             pipeline[0]['$match']['p'] = tc
-            pipeline[0]['$match']['d'] = {'$lte':latest_date, '$gte':earliest_date}
+            pipeline[0]['$match']['d'] = {'$lte':latest_date_dct[tc], '$gte':earliest_date}
             q = list(insights.aggregate(pipeline))
             for i, row in enumerate(q):
                 df_list.append([
@@ -266,21 +266,21 @@ user_eligibility_dct, pipeline, metric, user_list_marked=False, marked_dt_dct=No
     else:
         pickle_me(df, fname)
 
-def movetime_firstthreemoves(insights, live, fdir, datagen_date,
-user_eligibility_dct, user_list_marked=False, marked_dt_dct=None, overwrite_data=False):
+def movetime_firstthreemoves(insights, live, fdir, tc_list,
+user_eligibility_dct, user_list_marked=False, player_dt_dct=None, overwrite_data=False):
     fname = '{}/{}_{}.pkl'.format(fdir, 'movetime_firstthreemoves', bool(user_list_marked))
     if os.path.isfile(fname) and not overwrite_data:
         return 0
 
     df_list = []
     for u, user in enumerate(list(user_eligibility_dct.keys())):
-        latest_date = iterate_users(u, user, datagen_date, user_list_marked, marked_dt_dct)
-        if latest_date is None:
+        latest_date_dct = iterate_users(u, user, tc_list, user_list_marked, player_dt_dct)
+        if latest_date_dct is None:
             continue
         for tc, days in user_eligibility_dct[user]:
-            earliest_date = latest_date - datetime.timedelta(days=days)
+            earliest_date = latest_date_dct[tc] - datetime.timedelta(days=days)
             q = list(insights.find(
-                {'u':user, 'p':tc, 'd':{'$lte':latest_date, '$gte':earliest_date}},
+                {'u':user, 'p':tc, 'd':{'$lte':latest_date_dct[tc], '$gte':earliest_date}},
                 {'m.t':{'$slice': ['$m.t', 1, 3]}}
             ))
             for game in q:
@@ -322,8 +322,8 @@ user_eligibility_dct, user_list_marked=False, marked_dt_dct=None, overwrite_data
     else:
         pickle_me(df, fname)
 
-def generate_insights(insights, user_list, eligible_player_dct, datagen_date, 
-num_date_buckets, live, insights_df_chunks, use_eval, user_list_marked=False, marked_dt_dct=None,
+def generate_insights(insights, user_list, eligible_player_dct, tc_list, 
+num_date_buckets, live, insights_df_chunks, use_eval, user_list_marked=False, player_dt_dct=None,
 max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity_dct=True):
     """
     Returns a list of pandas DataFrames with the following columns:
@@ -333,7 +333,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
 
     days_list = list(num_date_buckets.keys())
     user_eligibility_dct = create_user_eligibility_dct(
-        tc_list=[2,6], 
+        tc_list=tc_list, 
         days_list=days_list, 
         eligible_player_dct=eligible_player_dct, 
         user_list=user_list,
@@ -351,7 +351,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         insights=insights,
         live=live,
         fdir=fdir,
-        datagen_date=datagen_date,
+        tc_list=tc_list,
         max_games=max_games, 
         max_moves=max_moves,
         max_moves_ix=6,
@@ -360,7 +360,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         metric='timevariance_date',
         num_date_buckets=num_date_buckets,
         user_list_marked=user_list_marked, 
-        marked_dt_dct=marked_dt_dct,
+        player_dt_dct=player_dt_dct,
         overwrite_data=overwrite_data
     ))
 
@@ -370,7 +370,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         insights=insights,
         live=live,
         fdir=fdir,
-        datagen_date=datagen_date,
+        tc_list=tc_list,
         max_games=max_games, 
         max_moves=max_moves,
         max_moves_ix=5,
@@ -379,7 +379,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         metric='blur_date',
         num_date_buckets=num_date_buckets,
         user_list_marked=user_list_marked, 
-        marked_dt_dct=marked_dt_dct,
+        player_dt_dct=player_dt_dct,
         overwrite_data=overwrite_data
     ))
 
@@ -389,14 +389,14 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         insights=insights,
         live=live,
         fdir=fdir,
-        datagen_date=datagen_date,
+        tc_list=tc_list,
         max_games=max_games, 
         user_eligibility_dct=user_eligibility_dct, 
         pipeline=opponentrating_by_date_pipeline,
         metric='opponentrating_date',
         num_date_buckets=num_date_buckets,
         user_list_marked=user_list_marked, 
-        marked_dt_dct=marked_dt_dct,
+        player_dt_dct=player_dt_dct,
         overwrite_data=overwrite_data
     ))
 
@@ -406,14 +406,14 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         insights=insights,
         live=live,
         fdir=fdir,
-        datagen_date=datagen_date,
+        tc_list=tc_list,
         max_games=max_games, 
         user_eligibility_dct=user_eligibility_dct, 
         pipeline=ratinggain_by_date_pipeline,
         metric='ratinggain_date',
         num_date_buckets=num_date_buckets,
         user_list_marked=user_list_marked, 
-        marked_dt_dct=marked_dt_dct,
+        player_dt_dct=player_dt_dct,
         overwrite_data=overwrite_data
     ))
 
@@ -422,7 +422,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         insights=insights,
         live=live,
         fdir=fdir,
-        datagen_date=datagen_date,
+        tc_list=tc_list,
         max_games=max_games, 
         max_moves=max_moves,
         max_moves_ix=6,
@@ -430,7 +430,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         pipeline=timevariance_by_movetime_pipeline,
         metric='timevariance_movetime', 
         user_list_marked=user_list_marked, 
-        marked_dt_dct=marked_dt_dct,
+        player_dt_dct=player_dt_dct,
         overwrite_data=overwrite_data
     ))
 
@@ -439,7 +439,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         insights=insights,
         live=live,
         fdir=fdir,
-        datagen_date=datagen_date,
+        tc_list=tc_list,
         max_games=max_games, 
         max_moves=max_moves,
         max_moves_ix=5,
@@ -447,7 +447,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         pipeline=blur_by_movetime_pipeline,
         metric='blur_movetime', 
         user_list_marked=user_list_marked, 
-        marked_dt_dct=marked_dt_dct,
+        player_dt_dct=player_dt_dct,
         overwrite_data=overwrite_data
     ))
 
@@ -457,7 +457,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         insights=insights,
         live=live,
         fdir=fdir,
-        datagen_date=datagen_date,
+        tc_list=tc_list,
         max_games=max_games, 
         max_moves=max_moves,
         max_moves_ix=5,
@@ -465,7 +465,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         pipeline=movetime_by_material_pipeline,
         metric='movetime_material', 
         user_list_marked=user_list_marked, 
-        marked_dt_dct=marked_dt_dct,
+        player_dt_dct=player_dt_dct,
         overwrite_data=overwrite_data
     ))
 
@@ -475,7 +475,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         insights=insights,
         live=live,
         fdir=fdir,
-        datagen_date=datagen_date,
+        tc_list=tc_list,
         max_games=max_games, 
         max_moves=max_moves,
         max_moves_ix=6,
@@ -483,7 +483,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         pipeline=timevariance_by_material_pipeline,
         metric='timevariance_material',  
         user_list_marked=user_list_marked, 
-        marked_dt_dct=marked_dt_dct,
+        player_dt_dct=player_dt_dct,
         overwrite_data=overwrite_data
     ))
 
@@ -493,7 +493,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         insights=insights,
         live=live,
         fdir=fdir,
-        datagen_date=datagen_date,
+        tc_list=tc_list,
         max_games=max_games, 
         max_moves=max_moves,
         max_moves_ix=5,
@@ -501,7 +501,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         pipeline=blur_by_material_pipeline,
         metric='blur_material',  
         user_list_marked=user_list_marked, 
-        marked_dt_dct=marked_dt_dct,
+        player_dt_dct=player_dt_dct,
         overwrite_data=overwrite_data
     ))
 
@@ -510,7 +510,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         insights=insights,
         live=live,
         fdir=fdir,
-        datagen_date=datagen_date,
+        tc_list=tc_list,
         max_games=max_games, 
         max_moves=max_moves,
         max_moves_ix=6,
@@ -518,7 +518,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         pipeline=timevariance_by_phase_pipeline,
         metric='timevariance_phase', 
         user_list_marked=user_list_marked, 
-        marked_dt_dct=marked_dt_dct,
+        player_dt_dct=player_dt_dct,
         overwrite_data=overwrite_data
     ))
 
@@ -527,7 +527,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         insights=insights,
         live=live,
         fdir=fdir,
-        datagen_date=datagen_date,
+        tc_list=tc_list,
         max_games=max_games, 
         max_moves=max_moves,
         max_moves_ix=5,
@@ -535,7 +535,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         pipeline=blur_by_phase_pipeline,
         metric='blur_phase', 
         user_list_marked=user_list_marked, 
-        marked_dt_dct=marked_dt_dct,
+        player_dt_dct=player_dt_dct,
         overwrite_data=overwrite_data
     ))
 
@@ -544,7 +544,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         insights=insights,
         live=live,
         fdir=fdir,
-        datagen_date=datagen_date,
+        tc_list=tc_list,
         max_games=max_games, 
         max_moves=max_moves,
         max_moves_ix=5,
@@ -552,7 +552,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         pipeline=movetime_by_phase_pipeline,
         metric='movetime_phase', 
         user_list_marked=user_list_marked, 
-        marked_dt_dct=marked_dt_dct,
+        player_dt_dct=player_dt_dct,
         overwrite_data=overwrite_data
     ))
 
@@ -561,7 +561,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         insights=insights,
         live=live,
         fdir=fdir,
-        datagen_date=datagen_date,
+        tc_list=tc_list,
         max_games=max_games, 
         max_moves=max_moves,
         max_moves_ix=6,
@@ -569,7 +569,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         pipeline=timevariance_by_blur_pipeline,
         metric='timevariance_blur', 
         user_list_marked=user_list_marked, 
-        marked_dt_dct=marked_dt_dct,
+        player_dt_dct=player_dt_dct,
         overwrite_data=overwrite_data
     ))
 
@@ -578,7 +578,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         insights=insights,
         live=live,
         fdir=fdir,
-        datagen_date=datagen_date,
+        tc_list=tc_list,
         max_games=max_games, 
         max_moves=max_moves,
         max_moves_ix=5,
@@ -586,7 +586,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         pipeline=movetime_by_blur_pipeline,
         metric='movetime_blur', 
         user_list_marked=user_list_marked, 
-        marked_dt_dct=marked_dt_dct,
+        player_dt_dct=player_dt_dct,
         overwrite_data=overwrite_data
     ))
 
@@ -595,7 +595,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         insights=insights,
         live=live,
         fdir=fdir,
-        datagen_date=datagen_date,
+        tc_list=tc_list,
         max_games=max_games, 
         max_moves=max_moves,
         max_moves_ix=6,
@@ -603,7 +603,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         pipeline=blur_by_timevariance_pipeline,
         metric='blur_timevariance', 
         user_list_marked=user_list_marked, 
-        marked_dt_dct=marked_dt_dct,
+        player_dt_dct=player_dt_dct,
         overwrite_data=overwrite_data
     ))
 
@@ -612,7 +612,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         insights=insights,
         live=live,
         fdir=fdir,
-        datagen_date=datagen_date,
+        tc_list=tc_list,
         max_games=max_games, 
         max_moves=max_moves,
         max_moves_ix=6,
@@ -620,7 +620,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         pipeline=movetime_by_timevariance_pipeline,
         metric='movetime_timevariance', 
         user_list_marked=user_list_marked, 
-        marked_dt_dct=marked_dt_dct,
+        player_dt_dct=player_dt_dct,
         overwrite_data=overwrite_data
     ))
 
@@ -629,7 +629,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         insights=insights,
         live=live,
         fdir=fdir,
-        datagen_date=datagen_date,
+        tc_list=tc_list,
         max_games=max_games, 
         max_moves=max_moves,
         max_moves_ix=6,
@@ -637,7 +637,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         pipeline=timevariance_by_result_pipeline,
         metric='timevariance_result', 
         user_list_marked=user_list_marked, 
-        marked_dt_dct=marked_dt_dct,
+        player_dt_dct=player_dt_dct,
         overwrite_data=overwrite_data
     ))
 
@@ -646,7 +646,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         insights=insights,
         live=live,
         fdir=fdir,
-        datagen_date=datagen_date,
+        tc_list=tc_list,
         max_games=max_games, 
         max_moves=max_moves,
         max_moves_ix=5,
@@ -654,7 +654,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         pipeline=blur_by_result_pipeline,
         metric='blur_result', 
         user_list_marked=user_list_marked, 
-        marked_dt_dct=marked_dt_dct,
+        player_dt_dct=player_dt_dct,
         overwrite_data=overwrite_data
     ))
 
@@ -663,7 +663,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         insights=insights,
         live=live,
         fdir=fdir,
-        datagen_date=datagen_date,
+        tc_list=tc_list,
         max_games=max_games, 
         max_moves=max_moves,
         max_moves_ix=6,
@@ -671,7 +671,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         pipeline=blurfiltered_by_result_pipeline,
         metric='blurfiltered_result', 
         user_list_marked=user_list_marked, 
-        marked_dt_dct=marked_dt_dct,
+        player_dt_dct=player_dt_dct,
         overwrite_data=overwrite_data
     ))
 
@@ -680,7 +680,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         insights=insights,
         live=live,
         fdir=fdir,
-        datagen_date=datagen_date,
+        tc_list=tc_list,
         max_games=max_games, 
         max_moves=max_moves,
         max_moves_ix=5,
@@ -688,7 +688,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         pipeline=movetime_by_result_pipeline,
         metric='movetime_result', 
         user_list_marked=user_list_marked, 
-        marked_dt_dct=marked_dt_dct,
+        player_dt_dct=player_dt_dct,
         overwrite_data=overwrite_data
     ))
 
@@ -698,13 +698,13 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         insights=insights,
         live=live,
         fdir=fdir,
-        datagen_date=datagen_date,
+        tc_list=tc_list,
         max_games=max_games, 
         user_eligibility_dct=user_eligibility_dct, 
         pipeline=opponentrating_by_result_pipeline,
         metric='opponentrating_result',
         user_list_marked=user_list_marked, 
-        marked_dt_dct=marked_dt_dct,
+        player_dt_dct=player_dt_dct,
         overwrite_data=overwrite_data
     ))
 
@@ -714,7 +714,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         insights=insights,
         live=live,
         fdir=fdir,
-        datagen_date=datagen_date,
+        tc_list=tc_list,
         max_games=max_games, 
         max_moves=max_moves,
         max_moves_ix=5,
@@ -722,7 +722,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         pipeline=movetime_by_piecemoved_pipeline,
         metric='movetime_piecemoved', 
         user_list_marked=user_list_marked, 
-        marked_dt_dct=marked_dt_dct,
+        player_dt_dct=player_dt_dct,
         overwrite_data=overwrite_data
     ))
 
@@ -732,7 +732,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         insights=insights,
         live=live,
         fdir=fdir,
-        datagen_date=datagen_date,
+        tc_list=tc_list,
         max_games=max_games, 
         max_moves=max_moves,
         max_moves_ix=6,
@@ -740,7 +740,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         pipeline=timevariance_by_piecemoved_pipeline,
         metric='timevariance_piecemoved',  
         user_list_marked=user_list_marked, 
-        marked_dt_dct=marked_dt_dct,
+        player_dt_dct=player_dt_dct,
         overwrite_data=overwrite_data
     ))
 
@@ -750,7 +750,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         insights=insights,
         live=live,
         fdir=fdir,
-        datagen_date=datagen_date,
+        tc_list=tc_list,
         max_games=max_games, 
         max_moves=max_moves,
         max_moves_ix=5,
@@ -758,7 +758,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         pipeline=blur_by_piecemoved_pipeline,
         metric='blur_piecemoved',  
         user_list_marked=user_list_marked, 
-        marked_dt_dct=marked_dt_dct,
+        player_dt_dct=player_dt_dct,
         overwrite_data=overwrite_data
     ))
 
@@ -768,10 +768,10 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         insights=insights,
         live=live,
         fdir=fdir,
-        datagen_date=datagen_date,
+        tc_list=tc_list,
         user_eligibility_dct=user_eligibility_dct,
         user_list_marked=user_list_marked, 
-        marked_dt_dct=marked_dt_dct, 
+        player_dt_dct=player_dt_dct, 
         overwrite_data=overwrite_data
     ))
 
@@ -784,7 +784,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         insights=insights,
         live=live,
         fdir=fdir,
-        datagen_date=datagen_date,
+        tc_list=tc_list,
         max_games=max_games, 
         max_moves=max_moves,
         max_moves_ix=5,
@@ -793,7 +793,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         metric='movetime_date',
         num_date_buckets=num_date_buckets,
         user_list_marked=user_list_marked, 
-        marked_dt_dct=marked_dt_dct,
+        player_dt_dct=player_dt_dct,
         overwrite_data=overwrite_data
     ))
 
@@ -803,7 +803,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         insights=insights,
         live=live,
         fdir=fdir,
-        datagen_date=datagen_date,
+        tc_list=tc_list,
         max_games=max_games, 
         max_moves=max_moves,
         max_moves_ix=6,
@@ -812,7 +812,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         metric='acplfiltered_date',
         num_date_buckets=num_date_buckets,
         user_list_marked=user_list_marked, 
-        marked_dt_dct=marked_dt_dct,
+        player_dt_dct=player_dt_dct,
         overwrite_data=overwrite_data
     ))
 
@@ -822,7 +822,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         insights=insights,
         live=live,
         fdir=fdir,
-        datagen_date=datagen_date,
+        tc_list=tc_list,
         max_games=max_games, 
         max_moves=max_moves,
         max_moves_ix=5,
@@ -830,7 +830,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         pipeline=acpl_by_movetime_pipeline,
         metric='acpl_movetime', 
         user_list_marked=user_list_marked, 
-        marked_dt_dct=marked_dt_dct,
+        player_dt_dct=player_dt_dct,
         overwrite_data=overwrite_data
     ))
 
@@ -839,7 +839,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         insights=insights,
         live=live,
         fdir=fdir,
-        datagen_date=datagen_date,
+        tc_list=tc_list,
         max_games=max_games, 
         max_moves=max_moves,
         max_moves_ix=5,
@@ -847,7 +847,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         pipeline=acpl_by_phase_pipeline,
         metric='acpl_phase', 
         user_list_marked=user_list_marked, 
-        marked_dt_dct=marked_dt_dct,
+        player_dt_dct=player_dt_dct,
         overwrite_data=overwrite_data
     ))
 
@@ -857,7 +857,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         insights=insights,
         live=live,
         fdir=fdir,
-        datagen_date=datagen_date,
+        tc_list=tc_list,
         max_games=max_games, 
         max_moves=max_moves,
         max_moves_ix=5,
@@ -865,7 +865,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         pipeline=acpl_by_material_pipeline,
         metric='acpl_material',  
         user_list_marked=user_list_marked, 
-        marked_dt_dct=marked_dt_dct,
+        player_dt_dct=player_dt_dct,
         overwrite_data=overwrite_data
     ))
 
@@ -874,7 +874,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         insights=insights,
         live=live,
         fdir=fdir,
-        datagen_date=datagen_date,
+        tc_list=tc_list,
         max_games=max_games, 
         max_moves=max_moves,
         max_moves_ix=5,
@@ -882,7 +882,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         pipeline=acpl_by_blur_pipeline,
         metric='acpl_blur', 
         user_list_marked=user_list_marked, 
-        marked_dt_dct=marked_dt_dct,
+        player_dt_dct=player_dt_dct,
         overwrite_data=overwrite_data
     ))
 
@@ -891,7 +891,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         insights=insights,
         live=live,
         fdir=fdir,
-        datagen_date=datagen_date,
+        tc_list=tc_list,
         max_games=max_games, 
         max_moves=max_moves,
         max_moves_ix=6,
@@ -899,7 +899,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         pipeline=acplfiltered_by_blur_pipeline,
         metric='acplfiltered_blur', 
         user_list_marked=user_list_marked, 
-        marked_dt_dct=marked_dt_dct,
+        player_dt_dct=player_dt_dct,
         overwrite_data=overwrite_data
     ))
 
@@ -908,7 +908,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         insights=insights,
         live=live,
         fdir=fdir,
-        datagen_date=datagen_date,
+        tc_list=tc_list,
         max_games=max_games, 
         max_moves=max_moves,
         max_moves_ix=6,
@@ -916,7 +916,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         pipeline=acpl_by_timevariance_pipeline,
         metric='acpl_timevariance', 
         user_list_marked=user_list_marked, 
-        marked_dt_dct=marked_dt_dct,
+        player_dt_dct=player_dt_dct,
         overwrite_data=overwrite_data
     ))
 
@@ -925,7 +925,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         insights=insights,
         live=live,
         fdir=fdir,
-        datagen_date=datagen_date,
+        tc_list=tc_list,
         max_games=max_games, 
         max_moves=max_moves,
         max_moves_ix=5,
@@ -933,7 +933,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         pipeline=acpl_by_result_pipeline,
         metric='acpl_result', 
         user_list_marked=user_list_marked, 
-        marked_dt_dct=marked_dt_dct,
+        player_dt_dct=player_dt_dct,
         overwrite_data=overwrite_data
     ))
 
@@ -943,7 +943,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         insights=insights,
         live=live,
         fdir=fdir,
-        datagen_date=datagen_date,
+        tc_list=tc_list,
         max_games=max_games, 
         max_moves=max_moves,
         max_moves_ix=5,
@@ -951,7 +951,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         pipeline=acpl_by_piecemoved_pipeline,
         metric='acpl_piecemoved',  
         user_list_marked=user_list_marked, 
-        marked_dt_dct=marked_dt_dct,
+        player_dt_dct=player_dt_dct,
         overwrite_data=overwrite_data
     ))
 
@@ -961,7 +961,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         insights=insights,
         live=live,
         fdir=fdir,
-        datagen_date=datagen_date,
+        tc_list=tc_list,
         max_games=max_games, 
         max_moves=max_moves,
         max_moves_ix=6,
@@ -969,7 +969,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         pipeline=movetime_by_evaluation_pipeline,
         metric='movetime_evaluation', 
         user_list_marked=user_list_marked, 
-        marked_dt_dct=marked_dt_dct,
+        player_dt_dct=player_dt_dct,
         overwrite_data=overwrite_data
     ))
 
@@ -979,7 +979,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         insights=insights,
         live=live,
         fdir=fdir,
-        datagen_date=datagen_date,
+        tc_list=tc_list,
         max_games=max_games, 
         max_moves=max_moves,
         max_moves_ix=6,
@@ -987,7 +987,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         pipeline=acpl_by_evaluation_pipeline,
         metric='acpl_evaluation',  
         user_list_marked=user_list_marked, 
-        marked_dt_dct=marked_dt_dct,
+        player_dt_dct=player_dt_dct,
         overwrite_data=overwrite_data
     ))
 
@@ -997,7 +997,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         insights=insights,
         live=live,
         fdir=fdir,
-        datagen_date=datagen_date,
+        tc_list=tc_list,
         max_games=max_games, 
         max_moves=max_moves,
         max_moves_ix=6,
@@ -1005,7 +1005,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         pipeline=timevariance_by_evaluation_pipeline,
         metric='timevariance_evaluation',  
         user_list_marked=user_list_marked, 
-        marked_dt_dct=marked_dt_dct,
+        player_dt_dct=player_dt_dct,
         overwrite_data=overwrite_data
     ))
 
@@ -1015,7 +1015,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         insights=insights,
         live=live,
         fdir=fdir,
-        datagen_date=datagen_date,
+        tc_list=tc_list,
         max_games=max_games, 
         max_moves=max_moves,
         max_moves_ix=6,
@@ -1023,7 +1023,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         pipeline=blur_by_evaluation_pipeline,
         metric='blur_evaluation',  
         user_list_marked=user_list_marked, 
-        marked_dt_dct=marked_dt_dct,
+        player_dt_dct=player_dt_dct,
         overwrite_data=overwrite_data
     ))
 
@@ -1033,7 +1033,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         insights=insights,
         live=live,
         fdir=fdir,
-        datagen_date=datagen_date,
+        tc_list=tc_list,
         max_games=max_games, 
         max_moves=max_moves,
         max_moves_ix=6,
@@ -1041,7 +1041,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         pipeline=timevariance_by_centipawnloss_pipeline,
         metric='timevariance_centipawnloss',  
         user_list_marked=user_list_marked, 
-        marked_dt_dct=marked_dt_dct,
+        player_dt_dct=player_dt_dct,
         overwrite_data=overwrite_data
     ))
 
@@ -1051,7 +1051,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         insights=insights,
         live=live,
         fdir=fdir,
-        datagen_date=datagen_date,
+        tc_list=tc_list,
         max_games=max_games, 
         max_moves=max_moves,
         max_moves_ix=6,
@@ -1059,7 +1059,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         pipeline=blur_by_centipawnloss_pipeline,
         metric='blur_centipawnloss',  
         user_list_marked=user_list_marked, 
-        marked_dt_dct=marked_dt_dct,
+        player_dt_dct=player_dt_dct,
         overwrite_data=overwrite_data
     ))
 
@@ -1069,7 +1069,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         insights=insights,
         live=live,
         fdir=fdir,
-        datagen_date=datagen_date,
+        tc_list=tc_list,
         max_games=max_games, 
         max_moves=max_moves,
         max_moves_ix=6,
@@ -1077,7 +1077,7 @@ max_games=1000, max_moves=20000, overwrite_data=False, overwrite_user_eligiblity
         pipeline=movetime_by_centipawnloss_pipeline,
         metric='movetime_centipawnloss', 
         user_list_marked=user_list_marked, 
-        marked_dt_dct=marked_dt_dct,
+        player_dt_dct=player_dt_dct,
         overwrite_data=overwrite_data
     ))
 

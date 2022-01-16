@@ -7,7 +7,7 @@ import logging
 from data_preparation.pipelines import acpl_by_date_pipeline, movetime_by_date_pipeline
 from data_preparation.insights_generation import define_user_lists, first_insight, \
     build_eligible_player_dct, generate_insights, build_additional_insights
-from data_preparation.user_level_data import  create_marked_dt_dct, build_dense_layer_data
+from data_preparation.user_level_data import  create_player_dt_dct, build_dense_layer_data
 from data_preparation.ml_transforms import clip_and_scale, handle_missing_values, \
     solve_mismatching_dimensions, build_labels, build_dimension_input_arrays
 from common.utils import pickle_me, unpickle_me, configure_logging, initialize_logging_for_modules
@@ -17,7 +17,6 @@ initialize_logging_for_modules(log)
 
 def build_data(insights, user_collection, live, live_user_list=None):
     # Parameters
-    datagen_date = datetime.datetime(2021, 11, 4)
     min_moves = 1000
     max_moves = 5000
     max_games = 250
@@ -27,23 +26,18 @@ def build_data(insights, user_collection, live, live_user_list=None):
     overwrite_data = False  # Should be True when using new mondodb collection, False otherwise
     overwrite_traintest_users = False   # Must be True for new mongodb training collections, otherwise False for speedup
     overwrite_user_eligiblity_dct = False # Must be True for new mongodb training collections, other False for speedup
-
    
-    if live:
-        # Set date to now
-        datagen_date = datetime.datetime.utcnow()
-    else:
+    if not live:
         # Index fields
         insights.create_index([('u', 1)])
         insights.create_index([('d', 1)])
         insights.create_index([('p', 1)])
 
-
-    # Build dictionary of marked users
-    marked_dt_dct = create_marked_dt_dct(user_collection, live=live)
-
     # Define user lists
     legit_users, cheat_users = define_user_lists(insights, user_collection, live=live, live_user_list=live_user_list)
+
+    # Get datetime for latest date for analysis
+    player_dt_dct = create_player_dt_dct(user_collection, insights, legit_users, tc_list, live=live)
 
     # First insight
     # This also determines which players meet minimum move thresholds for entry into the dataset
@@ -62,7 +56,6 @@ def build_data(insights, user_collection, live, live_user_list=None):
         user_list=legit_users, 
         tc_list=tc_list,   
         days_list=list(num_date_buckets.keys()), 
-        datagen_date=datagen_date,
         max_games=max_games, 
         max_moves=max_moves,
         min_moves=min_moves, 
@@ -70,7 +63,7 @@ def build_data(insights, user_collection, live, live_user_list=None):
         metric=first_metric,
         num_date_buckets=num_date_buckets,
         user_list_marked=False, 
-        marked_dt_dct=None,
+        player_dt_dct=player_dt_dct,
         overwrite_data=overwrite_data or live
     )
     
@@ -81,7 +74,6 @@ def build_data(insights, user_collection, live, live_user_list=None):
         user_list=cheat_users, 
         tc_list=tc_list,   
         days_list=list(num_date_buckets.keys()), 
-        datagen_date=datagen_date,
         max_games=max_games, 
         max_moves=max_moves,
         min_moves=min_moves, 
@@ -89,7 +81,7 @@ def build_data(insights, user_collection, live, live_user_list=None):
         metric=first_metric,
         num_date_buckets=num_date_buckets,
         user_list_marked=True, 
-        marked_dt_dct=marked_dt_dct,
+        player_dt_dct=player_dt_dct,
         overwrite_data=overwrite_data or live
     )
 
@@ -131,13 +123,13 @@ def build_data(insights, user_collection, live, live_user_list=None):
         insights, 
         user_list=legit_users, 
         eligible_player_dct=eligible_player_dct,
-        datagen_date=datagen_date, 
+        tc_list=tc_list,
         num_date_buckets=num_date_buckets,
         live=live,
         insights_df_chunks=insights_df_chunks,
         use_eval=use_eval,
         user_list_marked=False, 
-        marked_dt_dct=None,
+        player_dt_dct=player_dt_dct,
         max_games=max_games, 
         max_moves=max_moves,
         overwrite_data=overwrite_data,
@@ -150,13 +142,13 @@ def build_data(insights, user_collection, live, live_user_list=None):
             insights, 
             user_list=cheat_users, 
             eligible_player_dct=eligible_player_dct,
-            datagen_date=datagen_date, 
+            tc_list=tc_list,
             num_date_buckets=num_date_buckets,
             live=live,
             insights_df_chunks=insights_df_chunks,
             use_eval=use_eval,
             user_list_marked=True, 
-            marked_dt_dct=marked_dt_dct,
+            player_dt_dct=player_dt_dct,
             max_games=max_games, 
             max_moves=max_moves,
             overwrite_data=overwrite_data,

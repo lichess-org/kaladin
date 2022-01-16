@@ -28,13 +28,31 @@ def create_marks_df(cheat_df):
     marks = marks.groupby('_id', as_index=False).last()
     return marks
 
-def create_marked_dt_dct(user_collection, live):
-    if live:
-        return {}
+def create_player_dt_dct(user_collection, insights, legit_users, tc_list, live):
+    dct = {}
 
-    cheat_df = create_cheat_df(user_collection)
-    marks = create_marks_df(cheat_df)
-    return dict(marks[['_id', 'date']].values)
+    for user in legit_users:
+        dct[user] = {}
+        for tc in tc_list:
+            pipeline = [
+                {'$match': {'u':user, 'p':tc}},
+                {'$sort': {'d': -1}},
+                {'$limit': 1},
+                {'$project': {'d':True}},
+            ]
+            q = list(insights.aggregate(pipeline))
+            dct[user][tc] = q[0]['d']
+
+    if not live:
+        cheat_df = create_cheat_df(user_collection)
+        marks = create_marks_df(cheat_df)
+        
+        for user, mark_date in marks[['_id', 'date']].values:
+            dct[user] = {}
+            for tc in tc_list:
+                dct[user][tc] = mark_date
+
+    return dct
 
 def get_rating_df(collections):
     tc_map = {2:'blitz', 6:'rapid'}
