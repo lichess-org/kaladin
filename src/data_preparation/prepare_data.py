@@ -18,7 +18,7 @@ initialize_logging_for_modules(log)
 def build_data(insights, user_collection, live, live_user_list=None):
     # Parameters
     min_moves = 1000
-    max_moves = 5000
+    max_moves = 6000
     max_games = 250
     num_date_buckets={180:10,}
     tc_list = [2, 6]
