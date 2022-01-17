@@ -1,3 +1,4 @@
+from datetime import datetime
 import pandas as pd
 
 
@@ -41,7 +42,10 @@ def create_player_dt_dct(user_collection, insights, legit_users, tc_list, live):
                 {'$project': {'d':True}},
             ]
             q = list(insights.aggregate(pipeline))
-            dct[user][tc] = q[0]['d']
+            if q:
+                dct[user][tc] = q[0]['d']
+            else:
+                dct[user][tc] = datetime.now()
 
     if not live:
         cheat_df = create_cheat_df(user_collection)
