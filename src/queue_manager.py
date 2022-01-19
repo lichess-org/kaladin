@@ -42,6 +42,7 @@ LICHESS_USER_COLL = config['LICHESS_USER_COLL']
 log = logging.getLogger(__file__)
 log.setLevel(LOGGING_LEVEL)
 configure_logging(log)
+logging.getLogger('tensorflow').setLevel(logging.ERROR)
 
 
 ###########
