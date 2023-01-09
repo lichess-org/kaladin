@@ -18,6 +18,12 @@ Install Docker using your favorite package manager, or for example you can [foll
 
 Run `$./docker.sh gpu|cpu [dev|prod]` with the needed target, it will create/update the image and start the container. `dev` (default) will open `bash`, while `prod` will directly launch the queue manager: `python3 queue_manager.py`
 
+### Useful commands
+
+To restart the container: `docker restart kaladin`
+
+To view the logs: `docker logs -f kaladin`
+
 
 ## Configuration
 
