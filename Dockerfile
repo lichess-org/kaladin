@@ -37,4 +37,5 @@ ENV PYTHONPATH="$PYTHONPATH:~/kaladin"
 
 WORKDIR src
 
+SHELL ["/bin/bash", "-c"]
 ENTRYPOINT ["./start.sh"] # Allow for multiple target to be set
