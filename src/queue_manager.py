@@ -43,6 +43,7 @@ log = logging.getLogger(__file__)
 log.setLevel(LOGGING_LEVEL)
 configure_logging(log)
 logging.getLogger('tensorflow').setLevel(logging.ERROR)
+log.info(f'Logging Level: {LOGGING_LEVEL}')
 
 
 ###########
