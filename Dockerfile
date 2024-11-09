@@ -32,9 +32,6 @@ COPY --chown=kaladin src src
 # Only needed for Jupyter
 EXPOSE 8888
 
-# path fix
-ENV PYTHONPATH="/home/kaladin/kaladin"
-
 WORKDIR /home/kaladin/src
 
 ENTRYPOINT ["./start.sh"]
