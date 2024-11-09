@@ -33,9 +33,8 @@ COPY --chown=kaladin src src
 EXPOSE 8888
 
 # path fix
-ENV PYTHONPATH="$PYTHONPATH:~/kaladin"
+ENV PYTHONPATH="/home/kaladin/kaladin"
 
-WORKDIR src
+WORKDIR /home/kaladin/src
 
-SHELL ["/bin/bash", "-c"]
-ENTRYPOINT ["./start.sh"] # Allow for multiple target to be set
+ENTRYPOINT ["./start.sh"]
