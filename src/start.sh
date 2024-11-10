@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh -e
 
 target=${1:-dev} # dev | prod
 
@@ -11,4 +11,4 @@ then
 else
 	echo "target can only be dev or prod, not $target"
 	exit 1
-fi 
+fi
