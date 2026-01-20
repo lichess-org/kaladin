@@ -135,8 +135,9 @@ class QueueManager:
         # available data ['user', 'tc', 'days', 'label', 'pred', 
         # 'insight_1', 'shap_score_1', 'insight_2', 'shap_score_2', 'insight_3', 'shap_score_3']
         for user_dict in analysed_users:
-            user_response: Dict[str, Union[datetime, str, BDoc]] = {}
+            user_response: Dict[str, Union[datetime, str, BDoc, bool]] = {}
             user_response['at'] = datetime.utcnow()
+            user_response['read'] = False
             if response is None:
                 user_response['err'] = Error.BATCH_ERROR.name
             elif user_dict['_id'] not in response:
